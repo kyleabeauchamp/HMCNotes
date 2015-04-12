@@ -9,8 +9,8 @@ target_length = 200 * u.nanoseconds
 steps_per_hmc = 12
 
 n_steps = int(target_length / timestep)
-output_frequency = int(250 * u.femtoseconds /  timestep)
-barostat_frequency = int(25 * u.femtoseconds /  timestep)
+output_frequency = 20
+barostat_frequency = 4
 
 print(n_steps, output_frequency, barostat_frequency)
 
@@ -40,7 +40,7 @@ simulation.context.setPositions(pdb.positions)
 simulation.context.setPeriodicBoxVectors(*pdb.topology.getPeriodicBoxVectors())
 simulation.context.setVelocitiesToTemperature(temperature)
 
-simulation.step(10000)
+simulation.step(100)
 
-simulation.reporters.append(app.StateDataReporter(open(log_filename, 'w'), output_frequency, step=True, time=True, speed=True, density=True))
+simulation.reporters.append(app.StateDataReporter(open(log_filename, 'w'), output_frequency, step=True, time=True, speed=True, density=True, potentialEnergy=True, kineticEnergy=True))
 simulation.step(n_steps)
