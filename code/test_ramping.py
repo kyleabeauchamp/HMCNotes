@@ -4,12 +4,13 @@ import simtk.openmm as mm
 from simtk import unit as u
 from openmmtools import integrators, testsystems
 
+steps_per_hmc = 12
 collision_rate = 1.0 / u.picoseconds
 n_steps = 5000
 temperature = 300. * u.kelvin
 
-testsystem = testsystems.FlexibleWaterBox(box_edge=3.18 * u.nanometers)  # Around 1060 molecules of water
-#testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers)  # Around 1060 molecules of water
+#testsystem = testsystems.FlexibleWaterBox(box_edge=3.18 * u.nanometers)  # Around 1060 molecules of water
+testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers)  # Around 1060 molecules of water
 system = testsystem.system
 
 integrator = mm.LangevinIntegrator(temperature, 1.0 / u.picoseconds, 0.25 * u.femtoseconds)
@@ -28,11 +29,8 @@ def test_hmc(timestep, steps_per_hmc, alpha):
     integrator.step(n_steps)
     return integrator.acceptance_rate
 
-#timestep_list = np.array([1.0, 1.5])
-#timestep_list = np.linspace(1.5, 2.25, 4)
-timestep_list = [0.4]
-alpha_list = np.linspace(0.0, 0.07, 5)
-steps_per_hmc = 12
+timestep_list = np.linspace(2.05, 2.20, 5)
+alpha_list = np.linspace(0.0, 0.05, 5)
 data = []
 for i, timestep in enumerate(timestep_list):
     for j, alpha in enumerate(alpha_list):

@@ -49,3 +49,10 @@ integrator.step(5000)
 positions = context.getState(getPositions=True).getPositions()
 
 scores = optimize_hmc(system, positions)
+
+"""
+In [29]: max(scores)
+Out[29]: Quantity(value=1.5050494824835965, unit=femtosecond)
+
+{'steps_per_hmc': 11, 'timestep': 2.139677967704857}
+"""
