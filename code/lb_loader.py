@@ -1,12 +1,11 @@
+from simtk.openmm import app
 import numpy as np
-import pandas as pd
 import simtk.openmm as mm
 from simtk import unit as u
-from openmmtools import integrators, testsystems
 
-def load_lb():
-    prmtop_filename = "/home/kyleb/liquid_benchmark_3_14/equil/14314-42-2_1000_303.2.prmtop"
-    pdb_filename = "/home/kyleb/liquid_benchmark_3_14/equil/14314-42-2_1000_303.2_equil.pdb"
+def load_lb(cutoff=1.1 * u.nanometers):
+    prmtop_filename = "./input/126492-54-4_1000_300.6.prmtop"
+    pdb_filename = "./input/126492-54-4_1000_300.6_equil.pdb"
 
     pdb = app.PDBFile(pdb_filename)
     prmtop = app.AmberPrmtopFile(prmtop_filename)

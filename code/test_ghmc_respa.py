@@ -1,3 +1,4 @@
+import lb_loader
 import numpy as np
 import pandas as pd
 import simtk.openmm as mm
@@ -11,23 +12,18 @@ collision_rate = 1.0 / u.picoseconds
 timestep = 1.0 * u.femtoseconds
 steps_per_hmc = 12
 
-cutoff = 1.1 * u.nanometers
-
-testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=cutoff)  # Around 1060 molecules of water
-system = testsystem.system
-positions = testsystem.positions
+system, positions = lb_loader.load_lb()
 integrators.guess_force_groups(system)
 
 groups = [(0, 4), (1, 2), (2, 1)]
-
 integrator = integrators.GHMCRESPA(temperature, steps_per_hmc, timestep, collision_rate, groups)
 context = mm.Context(system, integrator)
 context.setPositions(positions)
 context.setVelocitiesToTemperature(temperature)
 
-for i in range(10):
+for i in range(100):
     data = []
-    for j in range(4):
+    for j in range(5):
         integrator.step(1)
         data.append(integrator.summary())
     data = pd.DataFrame(data)
