@@ -1,3 +1,4 @@
+import lb_loader
 import numpy as np
 import pandas as pd
 import simtk.openmm as mm
@@ -8,12 +9,12 @@ collision_rate = 1.0 / u.picoseconds
 n_steps = 1500
 temperature = 300. * u.kelvin
 
-testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers)  # Around 1060 molecules of water
-system = testsystem.system
+system, positions = lb_loader.load_lb()
+integrators.guess_force_groups(system)
 
 integrator = mm.LangevinIntegrator(temperature, 1.0 / u.picoseconds, 0.25 * u.femtoseconds)
-context = mm.Context(testsystem.system, integrator)
-context.setPositions(testsystem.positions)
+context = mm.Context(system, integrator)
+context.setPositions(positions)
 context.setVelocitiesToTemperature(temperature)
 integrator.step(5000)
 positions = context.getState(getPositions=True).getPositions()

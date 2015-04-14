@@ -9,5 +9,5 @@ def load_lb(cutoff=1.1 * u.nanometers):
 
     pdb = app.PDBFile(pdb_filename)
     prmtop = app.AmberPrmtopFile(prmtop_filename)
-    system = prmtop.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=cutoff, constraints=app.HAngles)  # Force rigid water here for comparison to other code
+    system = prmtop.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=cutoff, constraints=app.HBonds)  # Force rigid water here for comparison to other code
     return system, pdb.positions
