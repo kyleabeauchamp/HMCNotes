@@ -12,12 +12,7 @@ temperature = 300. * u.kelvin
 system, positions = lb_loader.load_lb()
 integrators.guess_force_groups(system)
 
-integrator = mm.LangevinIntegrator(temperature, 1.0 / u.picoseconds, 0.25 * u.femtoseconds)
-context = mm.Context(system, integrator)
-context.setPositions(positions)
-context.setVelocitiesToTemperature(temperature)
-integrator.step(5000)
-positions = context.getState(getPositions=True).getPositions()
+positions = lb_loader.pre_equil(system, positions, temperature)
 
 def test_hmc(timestep, steps_per_hmc):
     timestep = timestep * u.femtoseconds
