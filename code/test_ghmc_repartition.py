@@ -9,11 +9,12 @@ pd.set_option('display.width', 1000)
 
 n_steps = 3000
 temperature = 300. * u.kelvin
-constraints = app.AllBonds
 
-for hydrogenMass in [1.0 * u.amu, 2.0 * u.amu, 3.0 * u.amu, 4.0 * u.amu]:
-
-    system, positions = lb_loader.load_lb(constraints=constraints, hydrogenMass=hydrogenMass)
+for hydrogenMass in [1.0, 2.0, 3.0, 3.5]:
+    hydrogenMass = hydrogenMass * u.amu
+    #system, positions = lb_loader.load_lb(hydrogenMass=hydrogenMass)
+    testsystem = testsystems.DHFRExplicit(hydrogenMass=hydrogenMass)
+    system, positions = testsystem.system, testsystem.positions
 
     integrator = mm.LangevinIntegrator(temperature, 1.0 / u.picoseconds, 0.25 * u.femtoseconds)
     context = mm.Context(system, integrator)

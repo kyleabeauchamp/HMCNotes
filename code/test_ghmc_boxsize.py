@@ -11,8 +11,9 @@ temperature = 300. * u.kelvin
 testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers)  # Around 1060 molecules of water
 system, positions = testsystem.system, testsystem.positions
 
+rho = 0.71 ** (1 / 3.)
 
-for box_factor in [1.0, 0.71, 0.71 ** 2, 0.71 ** 3]:
+for box_factor in [rho ** 0, rho ** 1, rho ** 2, rho ** 3]:
     testsystem = testsystems.WaterBox(box_edge=6.0 * u.nanometers * box_factor)
     system, positions = testsystem.system, testsystem.positions
     print(system.getNumParticles())

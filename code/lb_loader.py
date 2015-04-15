@@ -21,3 +21,10 @@ def load_lb(cutoff=1.1 * u.nanometers, constraints=app.HBonds, hydrogenMass=1.0 
     prmtop = app.AmberPrmtopFile(prmtop_filename)
     system = prmtop.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=cutoff, constraints=constraints, hydrogenMass=hydrogenMass)  # Force rigid water here for comparison to other code
     return system, pdb.positions
+
+
+def set_masses(system):
+    total_mass = sum(system.getParticleMass(k) / u.dalton for k in range(system.getNumParticles()))
+    particle_mass = (total_mass / float(system.getNumParticles())) * u.dalton
+    for i in range(system.getNumParticles()):
+        system.setParticleMass(i, particle_mass)
