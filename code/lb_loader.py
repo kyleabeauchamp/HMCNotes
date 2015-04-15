@@ -13,11 +13,11 @@ def pre_equil(system, positions, temperature):
     return positions
     
 
-def load_lb(cutoff=1.1 * u.nanometers):
+def load_lb(cutoff=1.1 * u.nanometers, hydrogenMass=1.0 * u.amu):
     prmtop_filename = "./input/126492-54-4_1000_300.6.prmtop"
     pdb_filename = "./input/126492-54-4_1000_300.6_equil.pdb"
 
     pdb = app.PDBFile(pdb_filename)
     prmtop = app.AmberPrmtopFile(prmtop_filename)
-    system = prmtop.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=cutoff, constraints=app.HBonds)  # Force rigid water here for comparison to other code
+    system = prmtop.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=cutoff, constraints=app.HBonds, hydrogenMass=hydrogenMass)  # Force rigid water here for comparison to other code
     return system, pdb.positions

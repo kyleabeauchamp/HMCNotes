@@ -3,14 +3,15 @@ from simtk.openmm import app
 import simtk.openmm as mm
 from simtk import unit as u
 
-timestep = 2.0 * u.femtoseconds
+timestep = 1.0 * u.femtoseconds
 
 target_length = 200 * u.nanoseconds
 steps_per_hmc = 12
 
 n_steps = int(target_length / timestep)
 output_frequency = 20
-barostat_frequency = 4
+#barostat_frequency = 4
+barostat_frequency = 1
 
 print(n_steps, output_frequency, barostat_frequency)
 
@@ -31,8 +32,9 @@ prmtop = app.AmberPrmtopFile(prmtop_filename)
 
 system = prmtop.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=cutoff, constraints=app.HBonds)
 
-integrator = integrators.GHMC2(temperature, steps_per_hmc, timestep, collision_rate)
-system.addForce(mm.MonteCarloBarostat(pressure, temperature, barostat_frequency))
+#integrator = integrators.GHMC2(temperature, steps_per_hmc, timestep, collision_rate)
+integrator = mm.LangevinIntegrator(temperature, 1.0 / u.picoseconds, timestep)
+#system.addForce(mm.MonteCarloBarostat(pressure, temperature, barostat_frequency))
 
 simulation = app.Simulation(prmtop.topology, system, integrator)
 
@@ -43,4 +45,5 @@ simulation.context.setVelocitiesToTemperature(temperature)
 simulation.step(100)
 
 simulation.reporters.append(app.StateDataReporter(open(log_filename, 'w'), output_frequency, step=True, time=True, speed=True, density=True, potentialEnergy=True, kineticEnergy=True))
-simulation.step(n_steps)
+#simulation.step(n_steps)
+simulation.step(1000)

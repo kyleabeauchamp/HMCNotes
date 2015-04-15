@@ -6,39 +6,79 @@ from simtk import unit as u
 from openmmtools import integrators, testsystems
 pd.set_option('display.width', 1000)
 
-n_steps = 3000
+platform = mm.Platform_getPlatformByName("CUDA")
+platform_properties = dict(CudaPrecision="single")
+
+n_steps = 500
 temperature = 300. * u.kelvin
 collision_rate = 1.0 / u.picoseconds
+
 timestep = 1.0 * u.femtoseconds
-steps_per_hmc = 12
+#timestep = 2.16 * u.femtoseconds
+steps_per_hmc = 18
+
+#cutoff = 1.0 * u.nanometers
 
 system, positions = lb_loader.load_lb()
-integrators.guess_force_groups(system)
+#testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=cutoff)  # Around 1060 molecules of water
+#system, positions = testsystem.system, testsystem.positions
+
+integrators.guess_force_groups(system, nonbonded=1, fft=1)
 
 positions = lb_loader.pre_equil(system, positions, temperature)
 
-#groups = [(0, 4), (1, 2), (2, 1)]
-groups = [(0, 1), (1, 1), (2, 1)]
+factor = 3
+groups = [(0, factor), (1, 1)]
+
 integrator = integrators.GHMCRESPA(temperature, steps_per_hmc, timestep, collision_rate, groups)
+context = mm.Context(system, integrator, platform, platform_properties)
+context.setPositions(positions)
+context.setVelocitiesToTemperature(temperature)
+
+integrator.step(1)
+integrator.step(n_steps)
+print(pd.Series(integrator.summary))
+
+
+integrator = integrators.GHMC2(temperature, steps_per_hmc, timestep, collision_rate)
+context = mm.Context(system, integrator, platform, platform_properties)
+context.setPositions(positions)
+context.setVelocitiesToTemperature(temperature)
+
+integrator.step(1)
+integrator.step(n_steps)
+print(pd.Series(integrator.summary))
+
+
+import simtk.openmm.app as app
+integrator = mm.LangevinIntegrator(temperature, 1.0 / u.picoseconds, 1.0 * u.femtoseconds)
 context = mm.Context(system, integrator)
 context.setPositions(positions)
 context.setVelocitiesToTemperature(temperature)
 
-for i in range(100):
-    data = []
-    for j in range(5):
-        integrator.step(1)
-        data.append(integrator.summary())
-    data = pd.DataFrame(data)
-    print(data)
+import time
+integrator.step(1)
+t0 = time.time()
+integrator.step(1000)
+dt = time.time() - t0
+ns_per_second = 1E-3 / dt
+ns_per_day = 60 * 60 * 24 * ns_per_second
+ns_per_day
 
 
-"""
-# 4 2 1
-            Enew           Eold  accept  acceptance_rate    deltaE            ke  naccept  ntrials
-0  247736.062500  247735.109375       1         0.614919  0.953125  63250.007812      305      496
-1  247747.593750  247748.484375       1         0.615694 -0.890625  63305.453125      306      497
-2  247779.796875  247775.359375       0         0.614458  4.437500  63812.046875      306      498
-3  247763.515625  247760.218750       1         0.615230  3.296875  63264.609375      307      499
-4  247775.390625  247769.406250       0         0.614000  5.984375  63666.125000      307      500
-"""
+
+
+integrator = integrators.GHMC2(temperature, 10, 1.0 * u.femtoseconds, collision_rate)
+context = mm.Context(system, integrator, platform, platform_properties)
+context.setPositions(positions)
+context.setVelocitiesToTemperature(temperature)
+
+integrator.step(1)
+t0 = time.time()
+integrator.step(100)
+dt = time.time() - t0
+ns_per_second = 1E-3 / dt
+ns_per_day = 60 * 60 * 24 * ns_per_second
+ns_per_day
+
+integrator.effective_ns_per_day
