@@ -18,8 +18,8 @@ for box_factor in [1.0, 0.71, 0.71 ** 2, 0.71 ** 3]:
     print(system.getNumParticles())
 
     integrator = mm.LangevinIntegrator(temperature, 1.0 / u.picoseconds, 0.25 * u.femtoseconds)
-    context = mm.Context(testsystem.system, integrator)
-    context.setPositions(testsystem.positions)
+    context = mm.Context(system, integrator)
+    context.setPositions(positions)
     context.setVelocitiesToTemperature(temperature)
     integrator.step(10000)
     positions = context.getState(getPositions=True).getPositions()
