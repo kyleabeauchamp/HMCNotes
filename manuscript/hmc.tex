@@ -151,7 +151,7 @@ The main objective is to draw uncorrelated samples from some target distribution
 \begin{figure}
 \includegraphics[width=\columnwidth]{./figures/hmr_masses.pdf}
 \caption{{\bf HMR MASSES.}
-HMR MASSES
+The effect of hydrogen mass repartitioning on the effective performance, as measured by the raw performance times the acceptance rate.
 }
 \label{figure:hmr_masses}
 \end{figure}
@@ -164,6 +164,31 @@ HMR MASSES
 \subsection{Alanine Populations and escape times}
 
 \subsection{XCGHMC and XCMTSGHMC}
+
+\subsection{Raw Performance: The cost of fancy integrators}
+
+\begin{table}
+\begin{tabular}{lr}
+\toprule
+{} & ns\_per\_day \\
+\midrule
+name        &            \\
+vvvr        &       90.7 \\
+ghmc1       &       33.7 \\
+ghmc10      &       82.7 \\
+vv          &       91.7 \\
+ghmcrespa20 &       69.8 \\
+verlet      &      103.7 \\
+ghmc20      &       90.7 \\
+langevin    &      103.9 \\
+\bottomrule
+\end{tabular}
+\caption{{\bf Raw Performance of Various Integrators}
+Raw performance on DHFR, assuming a 2 fs timestep. This does NOT incorporate the acceptance rate.
+}
+\label{table:ThermoMLSummary}
+\end{table}
+
 
 
 

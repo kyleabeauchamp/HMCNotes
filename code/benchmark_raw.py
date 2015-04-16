@@ -43,7 +43,7 @@ for name, integrator in idict.items():
     cur_steps = n_steps / factors.get(name, 1)
     integrator.step(cur_steps)
     dt = time.time() - t0
-    ns_per_day = 0.001 / dt * 24 * 60 * 60
+    ns_per_day = 0.002 / dt * 24 * 60 * 60
     data.append(dict(name=name, dt=dt, ns_per_day=ns_per_day))
     print(data[-1])
 
