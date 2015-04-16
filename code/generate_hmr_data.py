@@ -10,11 +10,10 @@ pd.set_option('display.width', 1000)
 n_steps = 3000
 temperature = 300. * u.kelvin
 
-masses = [1.0, 2.0, 3.0, 3.5]
+masses = [1.0, 2.0, 3.0, 3.5, 4.0]
 data = []
 for hydrogenMass in masses:
     system, positions = lb_loader.load_lb(hydrogenMass=hydrogenMass * u.amu)
-    system, positions = testsystem.system, testsystem.positions
 
     integrator = mm.LangevinIntegrator(temperature, 1.0 / u.picoseconds, 0.25 * u.femtoseconds)
     context = mm.Context(system, integrator)
@@ -46,5 +45,5 @@ for hydrogenMass in masses:
     data.append(integrator.summary)
     data[-1]["mass"] = hydrogenMass
 
-data = pd.Data
+data = pd.DataFrame(data)
 data.to_csv("./tables/hmr_density.csv")
