@@ -28,3 +28,10 @@ def set_masses(system):
     particle_mass = (total_mass / float(system.getNumParticles())) * u.dalton
     for i in range(system.getNumParticles()):
         system.setParticleMass(i, particle_mass)
+
+
+def load_amoeba(hydrogenMass=1.0):
+    pdb = app.PDBFile("./sandbox/iamoeba.pdb")
+    forcefield = app.ForceField('iamoeba.xml')
+    system = forcefield.createSystem(pdb.topology, nonbondedMethod=app.PME, nonbondedCutoff=1.0*u.nanometers, hydrogenMass=hydrogenMass * u.amu, rigidWater=False)    
+    return system, pdb.positions
