@@ -80,7 +80,7 @@ def converge(context, n_steps=1, Neff_cutoff=1E4, sleep_time=60):
         sigma = energies.std()
         stderr = sigma * Neff ** -0.5
         
-        print("t0=%f, energy = %.4f + %.3f, N=%d, start=%d, g=%.4f, Neff=%.4f" % (t0, mu, sigma, len(energies), start, g, Neff, stderr))
+        print("t0=%f, energy = %.4f + %.3f, N=%d, start=%d, g=%.4f, Neff=%.4f, stderr=%f" % (t0, mu, sigma, len(energies), start, g, Neff, stderr))
 
         if Neff > Neff_cutoff:
             return data, start, g, Neff
