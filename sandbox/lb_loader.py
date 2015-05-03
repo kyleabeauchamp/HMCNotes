@@ -45,7 +45,9 @@ def converge(context, n_steps=1, Neff_cutoff=1E4, sleep_time=60):
     
     data = None
     
-    t0 = time.time()
+    t00 = time.time()
+    t0 = time.time() - t00
+    t1 = time.time() - t00
     
     while True:
         integrator.step(n_steps)
@@ -63,15 +65,17 @@ def converge(context, n_steps=1, Neff_cutoff=1E4, sleep_time=60):
         else:
             data.ix[len(data)] = current_data
 
-        if time.time() - t0 < sleep_time:
+        t1 = time.time() - t00
+        
+        if t1 - t0 < sleep_time:
             continue
         
-        t0 = time.time()
+        t0 = t1
         
         energies = data.energy.values
 
-        [t0, g, Neff] = pymbar.timeseries.detectEquilibration(energies, nskip=1000)
-        print("energy = %.4f + %.3f, N=%d, g=%.4f, Neff=%.4f" % (energies.mean(), energies.std(), len(energies), g, Neff))
+        [start, g, Neff] = pymbar.timeseries.detectEquilibration(energies, nskip=1000)
+        print("t0=%f, energy = %.4f + %.3f, N=%d, start=%d, g=%.4f, Neff=%.4f" % (t0, energies.mean(), energies.std(), len(energies), start, g, Neff))
 
         if Neff > Neff_cutoff:
-            return data, t0, g, Neff
+            return data, start, g, Neff
