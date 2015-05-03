@@ -43,8 +43,8 @@ def sample(context, n_iter=10, n_steps=1):
             return data
 
 
-timestep = 4 * u.femtoseconds  # LJ Cluster
-n_iter = 40000
+timestep = 2 * u.femtoseconds  # LJ Cluster
+n_iter = 160000
 data = {}
 
 integrator = mm.LangevinIntegrator(temperature, 1.0 / u.picoseconds, timestep / 2.)
@@ -122,3 +122,13 @@ X["relerr"] = (X.mu - X.mu.langevin) / X.mu.langevin
 
 print(X)
 print((X.mu - X.mu.langevin) / X.stderr)
+
+"""
+                      g           mu     sigma    stderr       zerr    relerr
+ghmc         157.665521 -3997.648116  5.643862  0.177168 -11.109699  0.000493
+ghmc1       1385.123790 -3997.317036  5.609147  0.521893  -3.137047  0.000410
+ghmcrespa1  1192.634591 -3997.397102  5.287009  0.456461  -3.762132  0.000430
+langevin      23.515424 -3995.679835  5.599026  0.067878   0.000000 -0.000000
+xhmc1       1573.943076 -3996.371055  5.805638  0.575817  -1.200416  0.000173
+xhmcrespa1  1559.874999 -3998.137542  5.659271  0.558786  -4.398299  0.000615
+"""
