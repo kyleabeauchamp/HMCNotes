@@ -103,3 +103,22 @@ def load_lj():
     system.setDefaultPeriodicBoxVectors(*boxes)
     
     return testsystem, system, positions
+
+def load(sysname):
+    
+    temperature = 300. * u.kelvin
+    timestep = 2 * u.femtoseconds  # LJ Cluster
+
+    if sysname == "ljbox":
+        system, positions = load_lj()[1:]
+        integrators.guess_force_groups(system, nonbonded=0, fft=0)
+        groups = [(0, 1)]
+        temperature = 25. * u.kelvin
+    
+    if sysname == "water":
+        testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers)  # Around 1060 molecules of water
+        system, positions = testsystem.system, testsystem.positions
+        integrators.guess_force_groups(system, nonbonded=0, fft=1)
+        groups = [(0, 2), (1, 1)]
+
+    return system, positions, groups, temperature, timestep
