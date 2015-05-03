@@ -1,3 +1,4 @@
+from openmmtools import integrators, testsystems
 import pymbar
 import pandas as pd
 import time
@@ -84,3 +85,21 @@ def converge(context, n_steps=1, Neff_cutoff=1E4, sleep_time=60):
 
         if Neff > Neff_cutoff:
             return data, start, g, Neff
+
+def build(system, integrator, positions, temperature):
+    context = mm.Context(system, integrator)
+    context.setPositions(positions)
+    context.setVelocitiesToTemperature(temperature)
+    return context
+
+def load_lj():
+    testsystem = testsystems.LennardJonesFluid()
+
+    system, positions = testsystem.system, testsystem.positions
+
+    positions = np.loadtxt("./sandbox/ljbox.dat")
+    length = 2.66723326712
+    boxes = ((length, 0, 0), (0, length, 0), (0, 0, length))
+    system.setDefaultPeriodicBoxVectors(*boxes)
+    
+    return testsystem, system, positions
