@@ -29,11 +29,10 @@ positions = context.getState(getPositions=True).getPositions()
 
 
 timestep = 2 * u.femtoseconds  # LJ Cluster
-n_iter = 160000
 
 integrator = mm.LangevinIntegrator(temperature, 1.0 / u.picoseconds, timestep / 2.)
 context = mm.Context(system, integrator)
 context.setPositions(positions)
 context.setVelocitiesToTemperature(temperature)
 
-data, t0, g, Neff = lb_loader.converge(context, n_steps=100, Neff_cutoff=300, sleep_time=10)
+data, t0, g, Neff = lb_loader.converge(context, n_steps=100, Neff_cutoff=5000, sleep_time=30)
