@@ -36,12 +36,12 @@ collision_rate = 10000.0 / u.picoseconds
 groups = [(0, 1), (1, 1), (2, 1)]
 timestep = 1.0 * u.femtoseconds
 steps_per_hmc = 10
-k_max = 6
+extra_chances = 6
 
 
 
 
-integrator = integrators.XHMCRESPAIntegrator(temperature, steps_per_hmc, timestep, collision_rate, k_max, groups)
+integrator = integrators.XHMCRESPAIntegrator(temperature, steps_per_hmc, timestep, collision_rate, extra_chances, groups)
 context = mm.Context(system, integrator)
 context.setPositions(positions)
 context.setVelocitiesToTemperature(temperature)
