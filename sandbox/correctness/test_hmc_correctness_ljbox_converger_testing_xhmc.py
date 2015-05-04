@@ -9,7 +9,7 @@ pd.set_option('display.width', 1000)
 
 collision_rate = 10000.0 / u.picoseconds
 
-sysname = "water"
+sysname = "density"
 
 system, positions, groups, temperature, timestep = lb_loader.load(sysname)
 
@@ -18,12 +18,11 @@ context = lb_loader.build(system, integrator, positions, temperature)
 integrator.step(10000)
 positions = context.getState(getPositions=True).getPositions()
 
-Neff_cutoff = 50.
-
-timestep = 3.0 * u.femtoseconds
-extra_chances = 0
+timestep = 1.0 * u.femtoseconds
+extra_chances = 1
 
 integrator = integrators.XHMCIntegrator(temperature, steps_per_hmc=10, timestep=timestep, collision_rate=1.0 / u.picoseconds, extra_chances=extra_chances, take_debug_steps=False)
 context = lb_loader.build(system, integrator, positions, temperature)
-integrator.step(2000)
+integrator.step(4000)
 output = integrator.vstep(20)
+integrator.effective_timestep
