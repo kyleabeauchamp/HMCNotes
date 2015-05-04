@@ -9,7 +9,7 @@ pd.set_option('display.width', 1000)
 
 collision_rate = 10000.0 / u.picoseconds
 
-sysname = "density"
+sysname = "ljbox"
 
 system, positions, groups, temperature, timestep = lb_loader.load(sysname)
 
@@ -21,8 +21,9 @@ positions = context.getState(getPositions=True).getPositions()
 timestep = 1.0 * u.femtoseconds
 extra_chances = 1
 
-integrator = integrators.XHMCIntegrator(temperature, steps_per_hmc=10, timestep=timestep, collision_rate=1.0 / u.picoseconds, extra_chances=extra_chances, take_debug_steps=False)
+integrator = integrators.GHMCIntegrator(temperature, steps_per_hmc=10, timestep=timestep, collision_rate=1.0 / u.picoseconds)
+#integrator = integrators.XCGHMCIntegrator(temperature, steps_per_hmc=10, timestep=timestep, collision_rate=1.0 / u.picoseconds, extra_chances=extra_chances, take_debug_steps=False)
 context = lb_loader.build(system, integrator, positions, temperature)
-integrator.step(4000)
+integrator.step(400)
 output = integrator.vstep(20)
 integrator.effective_timestep

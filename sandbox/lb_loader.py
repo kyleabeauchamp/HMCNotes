@@ -105,7 +105,7 @@ def load_lj():
     return testsystem, system, positions
 
 def load(sysname):
-    
+    cutoff = 0.9 * u.nanometers
     temperature = 300. * u.kelvin
     timestep = 2 * u.femtoseconds  # LJ Cluster
 
@@ -127,5 +127,11 @@ def load(sysname):
         groups = [(0, 2), (1, 1)]
         timestep = 1.0 * u.femtoseconds
 
+    if sysname == "dhfr":
+        testsystem = testsystems.DHFRExplicit(nonbondedCutoff=cutoff, nonbondedMethod=app.PME)
+        system, positions = testsystem.system, testsystem.positions
+        integrators.guess_force_groups(system, nonbonded=1, fft=2, others=0)
+        groups = [(0, 2), (1, 1)]
+        timestep = 1.0 * u.femtoseconds
 
     return system, positions, groups, temperature, timestep
