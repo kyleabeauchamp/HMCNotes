@@ -9,11 +9,11 @@ pd.set_option('display.width', 1000)
 
 collision_rate = 10000.0 / u.picoseconds
 
-sysname = "ljbox"
+sysname = "density"
 
 system, positions, groups, temperature, timestep = lb_loader.load(sysname)
 
-integrator = mm.LangevinIntegrator(temperature, 1.0 / u.picoseconds, 0.5 * u.femtoseconds)
+integrator = mm.LangevinIntegrator(temperature, 1.0 / u.picoseconds, timestep / 4.)
 context = lb_loader.build(system, integrator, positions, temperature)
 integrator.step(20000)
 positions = context.getState(getPositions=True).getPositions()
