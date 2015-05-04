@@ -9,7 +9,7 @@ pd.set_option('display.width', 1000)
 
 collision_rate = 10000.0 / u.picoseconds
 
-sysname = "water"
+sysname = "ljbox"
 
 system, positions, groups, temperature, timestep = lb_loader.load(sysname)
 
@@ -18,7 +18,7 @@ context = lb_loader.build(system, integrator, positions, temperature)
 integrator.step(20000)
 positions = context.getState(getPositions=True).getPositions()
 
-Neff_cutoff = 5000.
+Neff_cutoff = 2000.
 sleep_time = 10.
 
 integrator = mm.LangevinIntegrator(temperature, 1.0 / u.picoseconds, timestep / 2.)
