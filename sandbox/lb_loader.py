@@ -125,7 +125,7 @@ def load(sysname):
         system, positions = load_lb(hydrogenMass=3.0 * u.amu)
         integrators.guess_force_groups(system, nonbonded=1, fft=2, others=0)
         groups = [(0, 2), (1, 1)]
-        timestep = 0.75 * u.femtoseconds
+        timestep = 1.0 * u.femtoseconds
 
 
     return system, positions, groups, temperature, timestep
