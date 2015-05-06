@@ -17,7 +17,7 @@ positions = context.getState(getPositions=True).getPositions()
 
 collision_rate = 1.0 / u.picoseconds
 n_steps = 25
-Neff_cutoff = 1200.
+Neff_cutoff = 1600.
 
 # HACK to facilitate iterating over integrators
 def LangevinIntegrator(temperature=None, timestep=None):

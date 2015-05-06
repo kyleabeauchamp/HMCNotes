@@ -113,14 +113,14 @@ def load(sysname):
         integrators.guess_force_groups(system, nonbonded=0, fft=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
-        timestep = 4 * u.femtoseconds  # LJ Cluster
+        timestep = 20 * u.femtoseconds  # LJ Cluster
     
     if sysname == "water":
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
         integrators.guess_force_groups(system, nonbonded=0, fft=1)
         groups = [(0, 2), (1, 1)]
-        timestep = 4 * u.femtoseconds  # LJ Cluster
+        timestep = 3 * u.femtoseconds  # LJ Cluster
 
     if sysname == "density":
         system, positions = load_lb(hydrogenMass=3.0 * u.amu)

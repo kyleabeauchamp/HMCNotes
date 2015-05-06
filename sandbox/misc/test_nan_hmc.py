@@ -18,10 +18,10 @@ context = lb_loader.build(system, integrator, positions, temperature)
 integrator.step(10000)
 positions = context.getState(getPositions=True).getPositions()
 
-timestep = 25.0 * u.femtoseconds
+timestep = 3.0 * u.femtoseconds
 
 integrator = integrators.HMCIntegrator(temperature, steps_per_hmc=10, timestep=timestep)
 context = lb_loader.build(system, integrator, positions, temperature)
-integrator.step(1)
-#output = integrator.vstep(20)
+integrator.step(100)
+output = integrator.vstep(20)
 integrator.effective_timestep
