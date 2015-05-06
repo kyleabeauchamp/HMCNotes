@@ -5,8 +5,9 @@ import numpy as np
 import simtk.openmm as mm
 from simtk import unit as u
 from openmmtools import integrators, testsystems
+import sys
 
-sysname = "ljbox"
+sysname = sys.argv[1]
 
 system, positions, groups, temperature, timestep = lb_loader.load(sysname)
 
