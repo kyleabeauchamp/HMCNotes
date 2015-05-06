@@ -12,12 +12,12 @@ system, positions, groups, temperature, timestep = lb_loader.load(sysname)
 
 integrator = mm.LangevinIntegrator(temperature, 1.0 / u.picoseconds, timestep / 4.)
 context = lb_loader.build(system, integrator, positions, temperature)
-integrator.step(20000)
+integrator.step(50000)
 positions = context.getState(getPositions=True).getPositions()
 
 collision_rate = 1.0 / u.picoseconds
 n_steps = 25
-Neff_cutoff = 15.
+Neff_cutoff = 1200.
 
 # HACK to facilitate iterating over integrators
 def LangevinIntegrator(temperature=None, timestep=None):
