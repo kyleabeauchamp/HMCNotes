@@ -86,10 +86,10 @@ def converge(context, n_steps=1, Neff_cutoff=1E4, sleep_time=10):
         if Neff > Neff_cutoff:
             return data, start, g, Neff
 
-def build(system, integrator, positions, temperature):
+def build(system, integrator, positions, temperature, precision="mixed"):
 
     platform = mm.Platform.getPlatformByName('CUDA')
-    properties = {'CudaPrecision': 'mixed'}
+    properties = {'CudaPrecision': precision}
 
     context = mm.Context(system, integrator, platform, properties)
     context.setPositions(positions)

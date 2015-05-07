@@ -6,7 +6,9 @@ import simtk.openmm as mm
 from simtk import unit as u
 from openmmtools import integrators, testsystems
 
-sysname = "water"
+precision = "double"
+
+sysname = "ljbox"
 
 system, positions, groups, temperature, timestep = lb_loader.load(sysname)
 
@@ -41,8 +43,8 @@ for settings in grid:
     if "RESPA" in itype:
         settings["groups"] = groups
     integrator = getattr(integrators, itype)(**settings)
-    context = lb_loader.build(system, integrator, positions, temperature)
-    filename = "./mixed/%s_%s_%.3f_%d.csv" % (sysname, itype, timestep / u.femtoseconds, collision_rate * u.picoseconds)
+    context = lb_loader.build(system, integrator, positions, temperature, precision=precision)
+    filename = "./%s/%s_%s_%.3f_%d.csv" % (precision, sysname, itype, timestep / u.femtoseconds, collision_rate * u.picoseconds)
     print(filename)
     data, start, g, Neff = lb_loader.converge(context, n_steps=n_steps, Neff_cutoff=Neff_cutoff)
     data.to_csv(filename)
