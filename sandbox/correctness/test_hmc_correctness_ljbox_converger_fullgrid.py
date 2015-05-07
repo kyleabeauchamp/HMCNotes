@@ -5,9 +5,8 @@ import numpy as np
 import simtk.openmm as mm
 from simtk import unit as u
 from openmmtools import integrators, testsystems
-import sys
 
-sysname = sys.argv[1]
+sysname = "density"
 
 system, positions, groups, temperature, timestep = lb_loader.load(sysname)
 
@@ -18,7 +17,7 @@ positions = context.getState(getPositions=True).getPositions()
 
 collision_rate = 1.0 / u.picoseconds
 n_steps = 25
-Neff_cutoff = 1600.
+Neff_cutoff = 2000.
 
 # HACK to facilitate iterating over integrators
 def LangevinIntegrator(temperature=None, timestep=None):
@@ -39,6 +38,8 @@ for settings in grid:
     itype = settings.pop("itype")
     settings["temperature"] = temperature
     timestep = settings["timestep"]
+    if "RESPA" in itype:
+        settings["groups"] = groups
     integrator = getattr(integrators, itype)(**settings)
     context = lb_loader.build(system, integrator, positions, temperature)
     filename = "./data/%s_%s_%.3f_%d.csv" % (sysname, itype, timestep / u.femtoseconds, collision_rate * u.picoseconds)
