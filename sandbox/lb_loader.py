@@ -117,7 +117,7 @@ def load(sysname):
         integrators.guess_force_groups(system, nonbonded=0, fft=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
-        timestep = 15 * u.femtoseconds  # LJ Cluster
+        timestep = 16 * u.femtoseconds  # LJ Cluster
     
     if sysname == "water":
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers)  # Around 1060 molecules of water
