@@ -87,7 +87,11 @@ def converge(context, n_steps=1, Neff_cutoff=1E4, sleep_time=10):
             return data, start, g, Neff
 
 def build(system, integrator, positions, temperature):
-    context = mm.Context(system, integrator)
+
+    platform = mm.Platform.getPlatformByName('CUDA')
+    properties = {'CudaPrecision': 'mixed'}
+
+    context = mm.Context(system, integrator, platform, properties)
     context.setPositions(positions)
     context.setVelocitiesToTemperature(temperature)
     return context

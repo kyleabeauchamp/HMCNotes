@@ -34,4 +34,6 @@ for sysname, x in data.groupby("sysname"):
 
 data["error"] = data.mu - data.true
 data["relerror"] = data.error / data.true
-data
+
+X = data[data.sysname == "ljbox"]
+X
