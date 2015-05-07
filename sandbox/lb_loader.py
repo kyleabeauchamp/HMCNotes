@@ -88,10 +88,13 @@ def converge(context, n_steps=1, Neff_cutoff=1E4, sleep_time=10):
 
 def build(system, integrator, positions, temperature, precision="mixed"):
 
-    platform = mm.Platform.getPlatformByName('CUDA')
-    properties = {'CudaPrecision': precision}
-
-    context = mm.Context(system, integrator, platform, properties)
+    try:
+        platform = mm.Platform.getPlatformByName('CUDA')
+        properties = {'CudaPrecision': precision}
+        context = mm.Context(system, integrator, platform, properties)
+    except:
+        context = mm.Context(system, integrator)
+    
     context.setPositions(positions)
     context.setVelocitiesToTemperature(temperature)
     return context
@@ -138,5 +141,14 @@ def load(sysname):
         integrators.guess_force_groups(system, nonbonded=1, fft=1, others=0)
         groups = [(0, 4), (1, 1)]
         timestep = 1.0 * u.femtoseconds
+
+    if sysname == "ho":
+        K = 90.0 * u.kilocalories_per_mole / u.angstroms**2
+        mass = 39.948 * u.amu
+        timestep = np.sqrt(mass / K) * 0.2
+        testsystem = testsystems.HarmonicOscillatorArray()
+        system, positions = testsystem.system, testsystem.positions
+        groups = [(0, 1)]
+
 
     return system, positions, groups, temperature, timestep
