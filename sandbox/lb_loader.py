@@ -145,7 +145,7 @@ def load(sysname):
     if sysname == "ho":
         K = 90.0 * u.kilocalories_per_mole / u.angstroms**2
         mass = 39.948 * u.amu
-        timestep = np.sqrt(mass / K) * 0.2
+        timestep = np.sqrt(mass / K) * 0.4
         testsystem = testsystems.HarmonicOscillatorArray()
         system, positions = testsystem.system, testsystem.positions
         groups = [(0, 1)]
