@@ -150,5 +150,10 @@ def load(sysname):
         system, positions = testsystem.system, testsystem.positions
         groups = [(0, 1)]
 
+    if sysname == "customho":
+        timestep = 400.0 * u.femtoseconds
+        testsystem = testsystems.HarmonicOscillatorArray()
+        system, positions = testsystem.system, testsystem.positions
+        groups = [(0, 1)]
 
     return system, positions, groups, temperature, timestep

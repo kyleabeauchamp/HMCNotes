@@ -9,6 +9,8 @@ from openmmtools import integrators, testsystems
 testsystem = testsystems.CustomPotentialTestSystem()
 system, positions = testsystem.system, testsystem.positions
 
+#system, positions, groups, temperature, timestep = lb_loader.load(sysname)
+
 temperature = 300 * u.kelvin
 timestep = 400.0 * u.femtoseconds
 
