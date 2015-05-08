@@ -9,7 +9,7 @@ from openmmtools import integrators, testsystems
 
 precision = "double"
 
-sysname = "ho"
+sysname = "customho"
 
 system, positions, groups, temperature, timestep0 = lb_loader.load(sysname)
 
@@ -20,7 +20,7 @@ positions = context.getState(getPositions=True).getPositions()
 
 collision_rate = 1.0 / u.picoseconds
 n_steps = 25
-Neff_cutoff = 40000.
+Neff_cutoff = 5E5
 
 itype = "LangevinIntegrator"
 

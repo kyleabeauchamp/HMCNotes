@@ -7,7 +7,7 @@ import simtk.openmm as mm
 from simtk import unit as u
 from openmmtools import integrators, testsystems
 
-precision = "mixed"
+precision = "double"
 
 sysname = "customho"
 
