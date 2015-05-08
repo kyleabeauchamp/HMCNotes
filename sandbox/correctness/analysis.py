@@ -5,7 +5,7 @@ import numpy as np
 import glob
 pd.set_option('display.width', 1000)
 
-filenames = glob.glob("./data/*.csv")
+filenames = glob.glob("./data/single/*.csv")
 
 data = []
 for filename in filenames:
@@ -27,13 +27,23 @@ for sysname, x in data.groupby("sysname"):
     a = x[x.integrator == "LangevinIntegrator"].timestep.values
     ind = a.argsort()
     b = x[x.integrator == "LangevinIntegrator"].mu.values
-    a = a[ind][:-1]
-    b = b[ind][:-1]
+    a = a[ind][0:2]
+    b = b[ind][0:2]
     slope, intercept, _, _, _ = scipy.stats.linregress(a, b)
     data["true"][data.sysname == sysname] = intercept
 
+data["true"] = true
 data["error"] = data.mu - data.true
 data["relerror"] = data.error / data.true
 
-X = data[data.sysname == "ljbox"]
+X = data[data.sysname == "ho"]
 X
+
+
+
+import openmmtools
+from simtk import unit as u
+testsystem = openmmtools.testsystems.HarmonicOscillatorArray()
+tstate = openmmtools.testsystems.ThermodynamicState(temperature=300*u.kelvin)
+true = testsystem.get_potential_expectation(tstate) / u.kilojoules_per_mole
+

@@ -20,22 +20,11 @@ positions = context.getState(getPositions=True).getPositions()
 
 collision_rate = 1.0 / u.picoseconds
 n_steps = 25
-Neff_cutoff = 6000.
+Neff_cutoff = 25000.
 
-# HACK to facilitate iterating over integrators
-def LangevinIntegrator(temperature=None, timestep=None):
-    return mm.LangevinIntegrator(temperature, collision_rate, timestep)
-
-integrators.LangevinIntegrator = LangevinIntegrator
-
-grid = []
-
-#for itype in ["LangevinIntegrator", "HMCIntegrator", "GHMCIntegrator", "XCHMCIntegrator", "XCGHMCIntegrator", "HMCRESPAIntegrator", "GHMCRESPAIntegrator", "XCHMCRESPAIntegrator", "XCGHMCRESPAIntegrator"]:
-for itype in ["LangevinIntegrator", "HMCIntegrator", "GHMCIntegrator"]:
-    for timestep_factor in [1.0, 2.0, 4.0, 8.0]:
-        d = dict(itype=itype, timestep=timestep / timestep_factor)
-        grid.append(d)
-
+for itype in ["HMCIntegrator"]:
+    d = dict(itype=itype, timestep=timestep / 2.0)
+    grid.append(d)
 
 
 for settings in grid:
@@ -46,7 +35,7 @@ for settings in grid:
         settings["groups"] = groups
     integrator = getattr(integrators, itype)(**settings)
     context = lb_loader.build(system, integrator, positions, temperature, precision=precision)
-    filename = "./data/%s/%s_%s_%.3f_%d.csv" % (precision, sysname, itype, timestep / u.femtoseconds, collision_rate * u.picoseconds)
+    filename = "./data/%s_%s_%s_%.3f_%d.csv" % (precision, sysname, itype, timestep / u.femtoseconds, collision_rate * u.picoseconds)
     if os.path.exists(filename):
         continue
     print(filename)
