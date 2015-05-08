@@ -22,8 +22,9 @@ collision_rate = 1.0 / u.picoseconds
 n_steps = 25
 Neff_cutoff = 25000.
 
+grid = []
 for itype in ["HMCIntegrator"]:
-    d = dict(itype=itype, timestep=timestep / 2.0)
+    d = dict(itype=itype, timestep=timestep)
     grid.append(d)
 
 
