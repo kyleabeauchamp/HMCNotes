@@ -7,7 +7,7 @@ import simtk.openmm as mm
 from simtk import unit as u
 from openmmtools import integrators, testsystems
 
-precision = "single"
+precision = "double"
 
 sysname = "ho"
 
@@ -20,7 +20,7 @@ positions = context.getState(getPositions=True).getPositions()
 
 collision_rate = 1.0 / u.picoseconds
 n_steps = 25
-Neff_cutoff = 25000.
+Neff_cutoff = 40000.
 
 grid = []
 for itype in ["HMCIntegrator"]:

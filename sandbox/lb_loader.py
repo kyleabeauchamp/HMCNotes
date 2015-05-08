@@ -71,20 +71,20 @@ def converge(context, n_steps=1, Neff_cutoff=1E4, sleep_time=25):
         if t1 - t0 < sleep_time:
             continue
         
-        t0 = t1
-        
         energies = data.energy.values
 
         [start, g, Neff] = pymbar.timeseries.detectEquilibration(energies, nskip=1000)
         
-        mu = energies.mean()
-        sigma = energies.std()
+        mu = energies[start:].mean()
+        sigma = energies[start:].std()
         stderr = sigma * Neff ** -0.5
         
         print("t0=%f, energy = %.4f + %.3f, N=%d, start=%d, g=%.4f, Neff=%.4f, stderr=%f" % (t0, mu, sigma, len(energies), start, g, Neff, stderr))
+        
+        t0 = t1
 
         if Neff > Neff_cutoff:
-            return data, start, g, Neff
+            return data, start, g, Neff, mu, sigma, stderr
 
 def build(system, integrator, positions, temperature, precision="mixed"):
 
