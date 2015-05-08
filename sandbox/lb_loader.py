@@ -152,8 +152,15 @@ def load(sysname):
 
     if sysname == "customho":
         timestep = 400.0 * u.femtoseconds
-        testsystem = testsystems.HarmonicOscillatorArray()
+        testsystem = testsystems.CustomPotentialTestSystem()
         system, positions = testsystem.system, testsystem.positions
         groups = [(0, 1)]
+
+    if sysname == "customsplitho":
+        timestep = 400.0 * u.femtoseconds
+        energy_expressions = ("0.75 * (x^2 + y^2 + z^2)", "0.25 * (x^2 + y^2 + z^2)")
+        testsystem = testsystems.CustomPotentialTestSystem(energy_expressions=energy_expressions)
+        system, positions = testsystem.system, testsystem.positions
+        groups = [(0, 2), (1, 1)]
 
     return system, positions, groups, temperature, timestep
