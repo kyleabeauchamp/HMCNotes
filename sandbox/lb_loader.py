@@ -41,7 +41,7 @@ def load_amoeba(hydrogenMass=1.0):
     return system, pdb.positions
 
 
-def converge(context, n_steps=1, Neff_cutoff=1E4, sleep_time=30):
+def converge(context, n_steps=1, Neff_cutoff=1E4, sleep_time=45, filename=None):
     integrator = context.getIntegrator()
     
     data = None
@@ -82,6 +82,9 @@ def converge(context, n_steps=1, Neff_cutoff=1E4, sleep_time=30):
         stderr = sigma * Neff ** -0.5
         
         print("t0=%f, energy = %.4f + %.3f, N=%d, start=%d, g=%.4f, Neff=%.4f, stderr=%f" % (t0, mu, sigma, len(energies), start, g, Neff, stderr))
+        
+        if filename is not None:
+            data.to_csv(filename)
         
         t0 = t1
 
