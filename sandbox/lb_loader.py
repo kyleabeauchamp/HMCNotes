@@ -105,8 +105,8 @@ def build(system, integrator, positions, temperature, precision="mixed"):
     context.setVelocitiesToTemperature(temperature)
     return context
 
-def load_lj():
-    testsystem = testsystems.LennardJonesFluid(dispersion_correction=False)
+def load_lj(cutoff=None, dispersion_correction=False):
+    testsystem = testsystems.LennardJonesFluid(dispersion_correction=dispersion_correction, cutoff=cutoff)
 
     system, positions = testsystem.system, testsystem.positions
 
@@ -123,6 +123,13 @@ def load(sysname):
 
     if sysname == "ljbox":
         testsystem, system, positions = load_lj()
+        integrators.guess_force_groups(system, nonbonded=0, fft=0)
+        groups = [(0, 1)]
+        temperature = 25. * u.kelvin
+        timestep = 16 * u.femtoseconds
+
+    if sysname == "longljbox":
+        testsystem, system, positions = load_lj(cutoff=1.333*u.nanometers)
         integrators.guess_force_groups(system, nonbonded=0, fft=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
