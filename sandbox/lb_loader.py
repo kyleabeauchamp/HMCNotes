@@ -106,7 +106,7 @@ def build(system, integrator, positions, temperature, precision="mixed"):
     return context
 
 def load_lj():
-    testsystem = testsystems.LennardJonesFluid()
+    testsystem = testsystems.LennardJonesFluid(dispersion_correction=False)
 
     system, positions = testsystem.system, testsystem.positions
 
@@ -122,7 +122,7 @@ def load(sysname):
     temperature = 300. * u.kelvin
 
     if sysname == "ljbox":
-        system, positions = load_lj()[1:]
+        testsystem, system, positions = load_lj()
         integrators.guess_force_groups(system, nonbonded=0, fft=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
