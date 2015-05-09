@@ -27,3 +27,4 @@ f = lambda mu: (mu, E0, mu - E0, (mu - E0) / E0)
 
 f(mu)
 relerr = lambda x: (x - E0) / E0
+E0

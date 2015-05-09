@@ -98,6 +98,7 @@ def build(system, integrator, positions, temperature, precision="mixed"):
         properties = {'CudaPrecision': precision}
         context = mm.Context(system, integrator, platform, properties)
     except:
+        print("Warning: no CUDA platform found, not specifying precision.")
         context = mm.Context(system, integrator)
     
     context.setPositions(positions)
@@ -125,14 +126,22 @@ def load(sysname):
         integrators.guess_force_groups(system, nonbonded=0, fft=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
-        timestep = 16 * u.femtoseconds  # LJ Cluster
+        timestep = 16 * u.femtoseconds
+
+    if sysname == "cluster":
+        testsystem = testsystems.LennardJonesCluster(nx=8, ny=8, nz=8)
+        system, positions = testsystem.system, testsystem.positions
+        integrators.guess_force_groups(system, nonbonded=0)
+        groups = [(0, 1)]
+        temperature = 25. * u.kelvin
+        timestep = 40 * u.femtoseconds
     
     if sysname == "water":
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
         integrators.guess_force_groups(system, nonbonded=0, fft=1)
         groups = [(0, 2), (1, 1)]
-        timestep = 3 * u.femtoseconds  # LJ Cluster
+        timestep = 3 * u.femtoseconds
 
     if sysname == "density":
         system, positions = load_lb(hydrogenMass=3.0 * u.amu)
@@ -168,4 +177,4 @@ def load(sysname):
         system, positions = testsystem.system, testsystem.positions
         groups = [(0, 2), (1, 1)]
 
-    return system, positions, groups, temperature, timestep
+    return system, positions, groups, temperature, timestep, testsystem
