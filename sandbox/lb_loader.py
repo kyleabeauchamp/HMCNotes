@@ -135,6 +135,13 @@ def load(sysname):
         temperature = 25. * u.kelvin
         timestep = 16 * u.femtoseconds
 
+    if sysname == "shortljbox":
+        testsystem, system, positions = load_lj(cutoff=0.75*u.nanometers)
+        integrators.guess_force_groups(system, nonbonded=0, fft=0)
+        groups = [(0, 1)]
+        temperature = 25. * u.kelvin
+        timestep = 16 * u.femtoseconds        
+
     if sysname == "cluster":
         testsystem = testsystems.LennardJonesCluster(nx=8, ny=8, nz=8)
         system, positions = testsystem.system, testsystem.positions
