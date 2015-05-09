@@ -74,7 +74,7 @@ def converge(context, n_steps=1, Neff_cutoff=1E4, sleep_time=25):
         energies = data.energy.values
         t2 = time.time()
         [start, g, Neff] = pymbar.timeseries.detectEquilibration(energies, nskip=1000)
-        print("dt pymbar = %f" % time.time() - t2)
+        print("dt pymbar = %f" % (time.time() - t2))
         mu = energies[start:].mean()
         sigma = energies[start:].std()
         stderr = sigma * Neff ** -0.5
