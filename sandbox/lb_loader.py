@@ -41,7 +41,7 @@ def load_amoeba(hydrogenMass=1.0):
     return system, pdb.positions
 
 
-def converge(context, n_steps=1, Neff_cutoff=1E4, sleep_time=25):
+def converge(context, n_steps=1, Neff_cutoff=1E4, sleep_time=30):
     integrator = context.getIntegrator()
     
     data = None

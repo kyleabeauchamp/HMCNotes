@@ -7,7 +7,7 @@ import simtk.openmm as mm
 from simtk import unit as u
 from openmmtools import integrators, testsystems
 
-precision = "double"
+precision = "single"
 
 sysname = "customho"
 
@@ -20,7 +20,7 @@ positions = context.getState(getPositions=True).getPositions()
 
 collision_rate = 1.0 / u.picoseconds
 n_steps = 25
-Neff_cutoff = 5E5
+Neff_cutoff = 2E6
 
 grid = []
 for itype in ["HMCIntegrator"]:
@@ -37,9 +37,8 @@ for settings in grid:
     integrator = getattr(integrators, itype)(**settings)
     context = lb_loader.build(system, integrator, positions, temperature, precision=precision)
     filename = "./data/%s_%s_%s_%.3f_%d.csv" % (precision, sysname, itype, timestep / u.femtoseconds, collision_rate * u.picoseconds)
-    if os.path.exists(filename):
-        continue
     print(filename)
+    simulation.step(1000)
     data, start, g, Neff = lb_loader.converge(context, n_steps=n_steps, Neff_cutoff=Neff_cutoff)
     data.to_csv(filename)
     
