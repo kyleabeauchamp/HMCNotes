@@ -176,6 +176,14 @@ def load(sysname):
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
         timestep = 10 * u.femtoseconds
+    
+    if sysname == "switchedshortbigcluster":
+        testsystem = testsystems.LennardJonesCluster(nx=20, ny=20, nz=20, cutoff=0.75*u.nanometers, switch_width=0.1*u.nanometers)
+        system, positions = testsystem.system, testsystem.positions
+        integrators.guess_force_groups(system, nonbonded=0)
+        groups = [(0, 1)]
+        temperature = 25. * u.kelvin
+        timestep = 10 * u.femtoseconds        
 
     if sysname == "bigcluster":
         testsystem = testsystems.LennardJonesCluster(nx=20, ny=20, nz=20, cutoff=1.25*u.nanometers)
