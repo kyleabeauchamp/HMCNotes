@@ -169,6 +169,22 @@ def load(sysname):
         temperature = 25. * u.kelvin
         timestep = 40 * u.femtoseconds
 
+    if sysname == "shortbigcluster":
+        testsystem = testsystems.LennardJonesCluster(nx=20, ny=20, nz=20, cutoff=0.75*u.nanometers)
+        system, positions = testsystem.system, testsystem.positions
+        integrators.guess_force_groups(system, nonbonded=0)
+        groups = [(0, 1)]
+        temperature = 25. * u.kelvin
+        timestep = 10 * u.femtoseconds
+
+    if sysname == "bigcluster":
+        testsystem = testsystems.LennardJonesCluster(nx=20, ny=20, nz=20, cutoff=1.25*u.nanometers)
+        system, positions = testsystem.system, testsystem.positions
+        integrators.guess_force_groups(system, nonbonded=0)
+        groups = [(0, 1)]
+        temperature = 25. * u.kelvin
+        timestep = 10 * u.femtoseconds
+
     if sysname == "shortcluster":
         testsystem = testsystems.LennardJonesCluster(nx=8, ny=8, nz=8, cutoff=0.75*u.nanometers)
         system, positions = testsystem.system, testsystem.positions
@@ -176,6 +192,8 @@ def load(sysname):
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
         timestep = 40 * u.femtoseconds
+
+        
 
     
     if sysname == "water":
