@@ -147,6 +147,14 @@ def load(sysname):
         timestep = 16 * u.femtoseconds        
 
     if sysname == "switchedljbox":
+        testsystem, system, positions = load_lj(switch_width=0.1*u.nanometers)
+        integrators.guess_force_groups(system, nonbonded=0, fft=0)
+        groups = [(0, 1)]
+        temperature = 25. * u.kelvin
+        timestep = 16 * u.femtoseconds        
+
+
+    if sysname == "switchedshortljbox":
         testsystem, system, positions = load_lj(cutoff=0.75*u.nanometers, switch_width=0.1*u.nanometers)
         integrators.guess_force_groups(system, nonbonded=0, fft=0)
         groups = [(0, 1)]
