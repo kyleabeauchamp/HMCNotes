@@ -149,6 +149,15 @@ def load(sysname):
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
         timestep = 40 * u.femtoseconds
+
+    if sysname == "shortcluster":
+        testsystem = testsystems.LennardJonesCluster(nx=8, ny=8, nz=8, cutoff=0.75*u.nanometers)
+        system, positions = testsystem.system, testsystem.positions
+        integrators.guess_force_groups(system, nonbonded=0)
+        groups = [(0, 1)]
+        temperature = 25. * u.kelvin
+        timestep = 40 * u.femtoseconds
+
     
     if sysname == "water":
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers)  # Around 1060 molecules of water
