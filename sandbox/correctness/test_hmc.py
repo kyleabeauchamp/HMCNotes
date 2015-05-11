@@ -7,9 +7,9 @@ import simtk.openmm as mm
 from simtk import unit as u
 from openmmtools import integrators, testsystems
 
-precision = "double"
+precision = "mixed"
 
-sysname = "customho"
+sysname = "longrfwater"
 
 system, positions, groups, temperature, timestep, testsystem = lb_loader.load(sysname)
 
@@ -20,7 +20,7 @@ positions = context.getState(getPositions=True).getPositions()
 
 collision_rate = 1.0 / u.picoseconds
 n_steps = 25
-Neff_cutoff = 2E6
+Neff_cutoff = 1E5
 
 grid = []
 for itype in ["HMCIntegrator"]:
@@ -38,6 +38,5 @@ for settings in grid:
     context = lb_loader.build(system, integrator, positions, temperature, precision=precision)
     filename = "./data/%s_%s_%s_%.3f_%d.csv" % (precision, sysname, itype, timestep / u.femtoseconds, collision_rate * u.picoseconds)
     print(filename)
-    integrator.step(1000)
+    integrator.step(10000)
     data, start, g, Neff, mu, sigma, stderr = lb_loader.converge(context, n_steps=n_steps, Neff_cutoff=Neff_cutoff, filename=filename)
-

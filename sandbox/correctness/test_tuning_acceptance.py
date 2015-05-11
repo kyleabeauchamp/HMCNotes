@@ -9,7 +9,7 @@ from openmmtools import integrators, testsystems
 
 precision = "single"
 
-sysname = "cluster"
+sysname = "switchedshortbigcluster"
 
 system, positions, groups, temperature, timestep, testsystem = lb_loader.load(sysname)
 

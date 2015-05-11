@@ -10,7 +10,7 @@ pd.set_option('display.width', 1000)
 
 system, positions, groups, temperature, timestep, testsystem = lb_loader.load("customho")
 E0 = (3/2.) * testsystem.n_particles * testsystems.kB * temperature / u.kilojoules_per_mole
-true = {"customho":E0}
+true = {"customho":E0, "cluster":np.nan, "ljbox":np.nan, "longljbox":np.nan, "shortcluster":np.nan, "shortljbox":np.nan, "switchedljbox":np.nan, "switchedshortljbox":np.nan, "bigcluster":np.nan, "shortbigcluster":np.nan, "water":np.nan, "rfwater":np.nan,"switchedshortbigcluster":np.nan, "longrfwater":np.nan}
 
 filenames = glob.glob("./data/*.csv")
 
@@ -29,9 +29,9 @@ for filename in filenames:
     print(data[-1])
 
 data = pd.DataFrame(data)
-data = data.sort("timestep")[::-1].sort("integrator")[::-1].sort("precision")
+data = data.sort("timestep")[::-1].sort("integrator")[::-1].sort("precision").sort("sysname")
 data["true"] = data.sysname.map(lambda x: true[x])
-data["extrapolated"] = data.mu
+data["extrapolated"] = np.nan
 
 
 for (precision, integrator, sysname), x in data.groupby(("precision", "integrator", "sysname")):
@@ -45,7 +45,11 @@ for (precision, integrator, sysname), x in data.groupby(("precision", "integrato
     slope, intercept, _, _, _ = scipy.stats.linregress(a, b)
     data["extrapolated"][(data.sysname == sysname) & (data.precision == precision) & (data.integrator == integrator)] = intercept
 
+data["true"][data.true.isnull()] = data.extrapolated[data.true.isnull()]
 data["error"] = data.mu - data.true
 data["relerror"] = data.error / data.true
 data["zscore"] = (data.mu - data.true) / data.stderr
+#data[["sysname", "integrator", "mu", "stderr", "Neff", "timestep"]]
 data
+
+

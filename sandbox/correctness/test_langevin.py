@@ -9,7 +9,7 @@ from openmmtools import integrators, testsystems
 
 precision = "mixed"
 
-sysname = "customho"
+sysname = "longrfwater"
 
 system, positions, groups, temperature, timestep0, testsystem = lb_loader.load(sysname)
 
@@ -24,11 +24,11 @@ Neff_cutoff = 1E5
 
 itype = "LangevinIntegrator"
 
-for timestep_factor in [4.0, 8.0]:
+for timestep_factor in [3.0]:
     timestep = (timestep0 / timestep_factor)
     integrator = mm.LangevinIntegrator(temperature, collision_rate, timestep)
     context = lb_loader.build(system, integrator, positions, temperature, precision=precision)
     filename = "./data/%s_%s_%s_%.3f_%d.csv" % (precision, sysname, itype, timestep / u.femtoseconds, collision_rate * u.picoseconds)
     print(filename)
-    integrator.step(1000)
+    integrator.step(250000)
     data, start, g, Neff, mu, sigma, stderr = lb_loader.converge(context, n_steps=n_steps, Neff_cutoff=Neff_cutoff, filename=filename)
