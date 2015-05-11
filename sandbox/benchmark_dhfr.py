@@ -4,7 +4,7 @@ import time
 import simtk.openmm.app as app
 import simtk.openmm as mm
 from simtk import unit as u
-from openmmtools import integrators, testsystems
+from openmmtools import hmc_integrators, testsystems
 
 n_steps = 10000
 temperature = 300. * u.kelvin

@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import simtk.openmm as mm
 from simtk import unit as u
-from openmmtools import integrators, testsystems
+from openmmtools import hmc_integrators, testsystems
 pd.set_option('display.width', 1000)
 
 n_steps = 3000
@@ -42,7 +42,7 @@ steps_per_hmc = 5
 k_max = 4
 
 
-integrator = integrators.XHMCIntegrator(temperature, steps_per_hmc, timestep, collision_rate, k_max)
+integrator = hmc_integrators.XHMCIntegrator(temperature, steps_per_hmc, timestep, collision_rate, k_max)
 context = mm.Context(system, integrator)
 context.setPositions(positions)
 context.setVelocitiesToTemperature(temperature)
@@ -59,7 +59,7 @@ energy, state.getPotentialEnergy(), state.getKineticEnergy()
 
 
 
-integrator = integrators.GHMCIntegrator(temperature, steps_per_hmc, timestep, collision_rate)
+integrator = hmc_integrators.GHMCIntegrator(temperature, steps_per_hmc, timestep, collision_rate)
 context = mm.Context(system, integrator)
 context.setPositions(positions)
 context.setVelocitiesToTemperature(temperature)

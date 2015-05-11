@@ -4,7 +4,7 @@ import simtk.openmm.app as app
 import numpy as np
 import simtk.openmm as mm
 from simtk import unit as u
-from openmmtools import integrators, testsystems
+from openmmtools import hmc_integrators, testsystems
 
 testsystem = testsystems.CustomPotentialTestSystem(n_particles=500)
 system, positions = testsystem.system, testsystem.positions
@@ -14,7 +14,7 @@ system, positions = testsystem.system, testsystem.positions
 temperature = 300 * u.kelvin
 timestep = 50.0 * u.femtoseconds
 
-integrator = integrators.HMCIntegrator(temperature, steps_per_hmc=25, timestep=timestep)
+integrator = hmc_integrators.HMCIntegrator(temperature, steps_per_hmc=25, timestep=timestep)
 context = lb_loader.build(system, integrator, positions, temperature)
 integrator.step(5)
 output = integrator.vstep(5)

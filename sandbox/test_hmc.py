@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import simtk.openmm as mm
 from simtk import unit as u
-from openmmtools import integrators, testsystems
+from openmmtools import hmc_integrators, testsystems
 
 opencl = mm.Platform_getPlatformByName("OpenCL")
 cuda = mm.Platform_getPlatformByName("CUDA")
@@ -26,7 +26,7 @@ positions = context.getState(getPositions=True).getPositions()
 
 def test_hmc(timestep, steps_per_hmc):
     timestep = timestep * u.femtoseconds
-    integrator = integrators.HMCIntegrator(temperature, steps_per_hmc, timestep)
+    integrator = hmc_integrators.HMCIntegrator(temperature, steps_per_hmc, timestep)
     context = mm.Context(system, integrator, platform)
     context.setPositions(positions)
     context.setVelocitiesToTemperature(temperature)

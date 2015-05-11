@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import simtk.openmm as mm
 from simtk import unit as u
-from openmmtools import integrators, testsystems
+from openmmtools import hmc_integrators, testsystems
 
 opencl = mm.Platform_getPlatformByName("OpenCL")
 cuda = mm.Platform_getPlatformByName("CUDA")
@@ -22,7 +22,7 @@ testsystem = testsystems.FlexibleWaterBox(box_edge=3.18 * u.nanometers)  # Aroun
 system = testsystem.system
 
 integrator = mm.LangevinIntegrator(temperature, 0.25 / u.picoseconds, 0.25 * u.femtoseconds)
-#integrator = integrators.RandomTimestepGHMC(temperature, 12, 0.25 * u.femtoseconds)
+#integrator = hmc_integrators.RandomTimestepGHMC(temperature, 12, 0.25 * u.femtoseconds)
 context = mm.Context(testsystem.system, integrator, platform)
 context.setPositions(testsystem.positions)
 context.setVelocitiesToTemperature(temperature)
@@ -31,7 +31,7 @@ positions = context.getState(getPositions=True).getPositions()
 
 def test_hmc(timestep, steps_per_hmc):
     timestep = timestep * u.femtoseconds
-    integrator = integrators.RandomTimestepGHMC(temperature, steps_per_hmc, timestep)
+    integrator = hmc_integrators.RandomTimestepGHMC(temperature, steps_per_hmc, timestep)
     context = mm.Context(system, integrator, platform)
     context.setPositions(positions)
     context.setVelocitiesToTemperature(temperature)

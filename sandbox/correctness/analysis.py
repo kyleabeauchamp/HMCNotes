@@ -1,5 +1,5 @@
 from simtk import unit as u
-from openmmtools import integrators, testsystems
+from openmmtools import hmc_integrators, testsystems
 import lb_loader
 import scipy.stats
 import pymbar

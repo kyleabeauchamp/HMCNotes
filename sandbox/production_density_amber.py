@@ -1,4 +1,4 @@
-from openmmtools import integrators, testsystems
+from openmmtools import hmc_integrators, testsystems
 from simtk.openmm import app
 import simtk.openmm as mm
 from simtk import unit as u
@@ -32,7 +32,7 @@ prmtop = app.AmberPrmtopFile(prmtop_filename)
 
 system = prmtop.createSystem(nonbondedMethod=app.PME, nonbondedCutoff=cutoff, constraints=app.HBonds)
 
-#integrator = integrators.GHMC2(temperature, steps_per_hmc, timestep, collision_rate)
+#integrator = hmc_integrators.GHMC2(temperature, steps_per_hmc, timestep, collision_rate)
 integrator = mm.LangevinIntegrator(temperature, 1.0 / u.picoseconds, timestep)
 #system.addForce(mm.MonteCarloBarostat(pressure, temperature, barostat_frequency))
 

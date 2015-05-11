@@ -5,7 +5,7 @@ import simtk.openmm.app as app
 import numpy as np
 import simtk.openmm as mm
 from simtk import unit as u
-from openmmtools import integrators, testsystems
+from openmmtools import hmc_integrators, testsystems
 pd.set_option('display.width', 1000)
 
 collision_rate = 100000.0 / u.picoseconds
@@ -30,7 +30,7 @@ def inner_objective(args):
     steps_per_hmc, timestep, extra_chances = args
     print(steps_per_hmc, timestep, extra_chances)
     timestep = timestep * u.femtoseconds
-    integrator = integrators.XCHMCIntegrator(temperature, steps_per_hmc=10, timestep=timestep, extra_chances=extra_chances)
+    integrator = hmc_integrators.XCHMCIntegrator(temperature, steps_per_hmc=10, timestep=timestep, extra_chances=extra_chances)
     context = lb_loader.build(system, integrator, positions, temperature)
     integrator.step(n_steps)
     _ = integrator.vstep(10)

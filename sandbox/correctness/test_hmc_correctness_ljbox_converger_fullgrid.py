@@ -5,7 +5,7 @@ import simtk.openmm.app as app
 import numpy as np
 import simtk.openmm as mm
 from simtk import unit as u
-from openmmtools import integrators, testsystems
+from openmmtools import hmc_integrators, testsystems
 
 precision = "single"
 
@@ -22,11 +22,11 @@ collision_rate = 1.0 / u.picoseconds
 n_steps = 25
 Neff_cutoff = 6000.
 
-# HACK to facilitate iterating over integrators
+# HACK to facilitate iterating over hmc_integrators
 def LangevinIntegrator(temperature=None, timestep=None):
     return mm.LangevinIntegrator(temperature, collision_rate, timestep)
 
-integrators.LangevinIntegrator = LangevinIntegrator
+hmc_integrators.LangevinIntegrator = LangevinIntegrator
 
 grid = []
 
@@ -44,7 +44,7 @@ for settings in grid:
     timestep = settings["timestep"]
     if "RESPA" in itype:
         settings["groups"] = groups
-    integrator = getattr(integrators, itype)(**settings)
+    integrator = getattr(hmc_integrators, itype)(**settings)
     context = lb_loader.build(system, integrator, positions, temperature, precision=precision)
     filename = "./data/%s/%s_%s_%.3f_%d.csv" % (precision, sysname, itype, timestep / u.femtoseconds, collision_rate * u.picoseconds)
     if os.path.exists(filename):

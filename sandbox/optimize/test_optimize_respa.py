@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import simtk.openmm as mm
 from simtk import unit as u
-from openmmtools import integrators, testsystems
+from openmmtools import hmc_integrators, testsystems
 pd.set_option('display.width', 1000)
 
 n_steps = 1500
@@ -17,7 +17,7 @@ hydrogenMass = 3.0 * u.amu
 testsystem = testsystems.DHFRExplicit(hydrogenMass=hydrogenMass, nonbondedCutoff=1.0 * u.nanometers)
 system, positions = testsystem.system, testsystem.positions
 
-integrators.guess_force_groups(system, nonbonded=1, fft=2, others=0)
+hmc_integrators.guess_force_groups(system, nonbonded=1, fft=2, others=0)
 
 integrator = mm.LangevinIntegrator(temperature, 1.0 / u.picoseconds, 0.25 * u.femtoseconds)
 context = mm.Context(system, integrator)
@@ -47,13 +47,13 @@ dict(nonbonded=2, fft=1, others=4),
 def set_respa(system, scheme):
     """INPLACE on system!"""
     if len(scheme.values()) == 1:
-        integrators.guess_force_groups(system, nonbonded=0, fft=0, others=0)
+        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0, others=0)
         groups = [(0, 1)]
     if len(scheme.values()) == 2:
-        integrators.guess_force_groups(system, nonbonded=0, fft=1, others=0)
+        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1, others=0)
         groups = [(0, scheme["others"]), (1, scheme["nonbonded"])]
     if len(scheme.values()) == 3:
-        integrators.guess_force_groups(system, nonbonded=1, fft=2, others=0)
+        hmc_integrators.guess_force_groups(system, nonbonded=1, fft=2, others=0)
         groups = [(0, scheme["others"]), (1, scheme["nonbonded"]), (2, scheme["fft"])]
     return groups
 
@@ -81,7 +81,7 @@ params_grid = {
 
 def hmc_inner(system, positions, params):
     groups = set_respa(system, params["respa"])
-    integrator = integrators.GHMCRESPA(temperature, params["steps_per_hmc"], params["timestep"] * u.femtoseconds, collision_rate, groups)
+    integrator = hmc_integrators.GHMCRESPA(temperature, params["steps_per_hmc"], params["timestep"] * u.femtoseconds, collision_rate, groups)
     context = mm.Context(system, integrator)
     context.setPositions(positions)
     context.setVelocitiesToTemperature(temperature)
@@ -113,7 +113,7 @@ timestep = 2.5 * u.femtoseconds
 steps_per_hmc = 23
 groups = set_respa(system, dict(nonbonded=1, fft=1, others=3))
 
-integrator = integrators.XHMCRESPAIntegrator(temperature, steps_per_hmc, timestep, collision_rate, k_max, groups)
+integrator = hmc_integrators.XHMCRESPAIntegrator(temperature, steps_per_hmc, timestep, collision_rate, k_max, groups)
 context = mm.Context(system, integrator)
 context.setPositions(positions)
 context.setVelocitiesToTemperature(temperature)

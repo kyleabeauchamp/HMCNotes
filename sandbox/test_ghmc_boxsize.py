@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import simtk.openmm as mm
 from simtk import unit as u
-from openmmtools import integrators, testsystems
+from openmmtools import hmc_integrators, testsystems
 pd.set_option('display.width', 1000)
 
 n_steps = 3000
@@ -30,7 +30,7 @@ for box_factor in [rho ** 0, rho ** 1, rho ** 2, rho ** 3]:
     steps_per_hmc = 12
     k_max = 3
 
-    integrator = integrators.GHMC2(temperature, steps_per_hmc, timestep)
+    integrator = hmc_integrators.GHMC2(temperature, steps_per_hmc, timestep)
     context = mm.Context(system, integrator)
     context.setPositions(positions)
     context.setVelocitiesToTemperature(temperature)

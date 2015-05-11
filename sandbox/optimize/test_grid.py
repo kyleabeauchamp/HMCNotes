@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import simtk.openmm as mm
 from simtk import unit as u
-from openmmtools import integrators, testsystems
+from openmmtools import hmc_integrators, testsystems
 pd.set_option('display.width', 1000)
 
 collision_rate = 1.0 / u.picoseconds
@@ -26,7 +26,7 @@ params_grid = {
 
 
 def hmc_inner(system, positions, params):
-    integrator = integrators.GHMC2(temperature, params["steps_per_hmc"], params["timestep"] * u.femtoseconds)
+    integrator = hmc_integrators.GHMC2(temperature, params["steps_per_hmc"], params["timestep"] * u.femtoseconds)
     context = mm.Context(system, integrator)
     context.setPositions(positions)
     context.setVelocitiesToTemperature(temperature)
@@ -47,7 +47,7 @@ def optimize_hmc(system, positions):
 #system, positions = testsystem.system, testsystem.positions
 
 system, positions = lb_loader.load_lb()
-#integrators.guess_force_groups(system)
+#hmc_integrators.guess_force_groups(system)
 positions = lb_loader.pre_equil(system, positions, temperature)
 
 n_iter = 30

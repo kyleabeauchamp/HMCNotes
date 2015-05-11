@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import simtk.openmm as mm
 from simtk import unit as u
-from openmmtools import integrators, testsystems
+from openmmtools import hmc_integrators, testsystems
 
 n_steps = 3000
 temperature = 300. * u.kelvin
@@ -19,7 +19,7 @@ positions = context.getState(getPositions=True).getPositions()
 
 def test_hmc(timestep, steps_per_hmc, collision_rate):
     timestep = timestep * u.femtoseconds
-    integrator = integrators.GHMC2(temperature, steps_per_hmc, timestep, collision_rate / u.picoseconds)
+    integrator = hmc_integrators.GHMC2(temperature, steps_per_hmc, timestep, collision_rate / u.picoseconds)
     context = mm.Context(system, integrator)
     context.setPositions(positions)
     context.setVelocitiesToTemperature(temperature)

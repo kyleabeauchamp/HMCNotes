@@ -4,14 +4,14 @@ import simtk.openmm.app as app
 import numpy as np
 import simtk.openmm as mm
 from simtk import unit as u
-from openmmtools import integrators, testsystems
+from openmmtools import hmc_integrators, testsystems
 
 sysname = "ljbox"
 collision_rate = 1.0 / u.picoseconds
 
 system, positions, groups, temperature, timestep = lb_loader.load(sysname)
 
-integrator = integrators.AndersenVelocityVerletIntegrator(temperature, collision_rate, timestep / 4.)
+integrator = hmc_integrators.AndersenVelocityVerletIntegrator(temperature, collision_rate, timestep / 4.)
 context = lb_loader.build(system, integrator, positions, temperature)
 integrator.step(50000)
 positions = context.getState(getPositions=True).getPositions()
@@ -31,7 +31,7 @@ for itype in ["AndersenVelocityVerletIntegrator"]:
 for settings in grid:
     itype = settings.pop("itype")
     timestep = settings["timestep"]
-    integrator = integrators.AndersenVelocityVerletIntegrator(temperature, collision_rate, timestep / 4.)
+    integrator = hmc_integrators.AndersenVelocityVerletIntegrator(temperature, collision_rate, timestep / 4.)
     context = lb_loader.build(system, integrator, positions, temperature)
     filename = "./data/%s_%s_%.3f_%d.csv" % (sysname, itype, timestep / u.femtoseconds, collision_rate * u.picoseconds)
     print(filename)

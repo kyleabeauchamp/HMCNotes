@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import simtk.openmm as mm
 from simtk import unit as u
-from openmmtools import integrators, testsystems
+from openmmtools import hmc_integrators, testsystems
 
 steps_per_hmc = 12
 collision_rate = 1.0 / u.picoseconds
@@ -22,7 +22,7 @@ positions = context.getState(getPositions=True).getPositions()
 
 def test_hmc(timestep, steps_per_hmc, alpha):
     timestep = timestep * u.femtoseconds
-    integrator = integrators.RampedHMCIntegrator(temperature, steps_per_hmc, timestep, max_boost=alpha)
+    integrator = hmc_integrators.RampedHMCIntegrator(temperature, steps_per_hmc, timestep, max_boost=alpha)
     context = mm.Context(system, integrator)
     context.setPositions(positions)
     context.setVelocitiesToTemperature(temperature)

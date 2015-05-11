@@ -7,13 +7,13 @@ import simtk.openmm.app as app
 import numpy as np
 import simtk.openmm as mm
 from simtk import unit as u
-from openmmtools import integrators, testsystems
+from openmmtools import hmc_integrators, testsystems
 
 sysname = "ljbox"
 
 system, positions, groups, temperature, timestep = lb_loader.load(sysname)
 
-integrator = integrators.GHMCIntegratorOneStep(temperature, timestep=8*u.femtoseconds)
+integrator = hmc_integrators.GHMCIntegratorOneStep(temperature, timestep=8*u.femtoseconds)
 context = lb_loader.build(system, integrator, positions, temperature)
 integrator.step(10)
 positions0 = context.getState(getPositions=True).getPositions(asNumpy=True)

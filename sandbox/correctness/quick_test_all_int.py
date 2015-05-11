@@ -4,7 +4,7 @@ import simtk.openmm.app as app
 import numpy as np
 import simtk.openmm as mm
 from simtk import unit as u
-from openmmtools import integrators, testsystems
+from openmmtools import hmc_integrators, testsystems
 pd.set_option('display.width', 1000)
 
 groups = [(0, 1)]
@@ -21,51 +21,51 @@ timestep = 1.0 * u.femtoseconds
 extra_chances = 1
 
 
-integrator = integrators.HMCIntegrator(temperature, steps_per_hmc=10, timestep=timestep)
+integrator = hmc_integrators.HMCIntegrator(temperature, steps_per_hmc=10, timestep=timestep)
 context = lb_loader.build(system, integrator, positions, temperature)
 integrator.step(40)
 output = integrator.vstep(10)
 integrator.effective_timestep
 
-integrator = integrators.GHMCIntegrator(temperature, steps_per_hmc=10, timestep=timestep, collision_rate=1.0 / u.picoseconds)
+integrator = hmc_integrators.GHMCIntegrator(temperature, steps_per_hmc=10, timestep=timestep, collision_rate=1.0 / u.picoseconds)
 context = lb_loader.build(system, integrator, positions, temperature)
 integrator.step(40)
 output = integrator.vstep(10)
 integrator.effective_timestep
 
-integrator = integrators.XCGHMCIntegrator(temperature, steps_per_hmc=10, timestep=timestep, collision_rate=1.0 / u.picoseconds, extra_chances=extra_chances, take_debug_steps=False)
+integrator = hmc_integrators.XCGHMCIntegrator(temperature, steps_per_hmc=10, timestep=timestep, collision_rate=1.0 / u.picoseconds, extra_chances=extra_chances, take_debug_steps=False)
 context = lb_loader.build(system, integrator, positions, temperature)
 integrator.step(40)
 output = integrator.vstep(10)
 integrator.effective_timestep
 
-integrator = integrators.XCGHMCRESPAIntegrator(temperature, steps_per_hmc=10, timestep=timestep, collision_rate=1.0 / u.picoseconds, extra_chances=extra_chances, groups=groups)
+integrator = hmc_integrators.XCGHMCRESPAIntegrator(temperature, steps_per_hmc=10, timestep=timestep, collision_rate=1.0 / u.picoseconds, extra_chances=extra_chances, groups=groups)
 context = lb_loader.build(system, integrator, positions, temperature)
 integrator.step(40)
 output = integrator.vstep(10)
 integrator.effective_timestep
 
-integrator = integrators.XCHMCIntegrator(temperature, steps_per_hmc=10, timestep=timestep, extra_chances=extra_chances, take_debug_steps=False)
+integrator = hmc_integrators.XCHMCIntegrator(temperature, steps_per_hmc=10, timestep=timestep, extra_chances=extra_chances, take_debug_steps=False)
 context = lb_loader.build(system, integrator, positions, temperature)
 integrator.step(40)
 output = integrator.vstep(10)
 integrator.effective_timestep
 
-integrator = integrators.XCHMCRESPAIntegrator(temperature, steps_per_hmc=10, timestep=timestep, extra_chances=extra_chances, groups=groups)
-context = lb_loader.build(system, integrator, positions, temperature)
-integrator.step(40)
-output = integrator.vstep(10)
-integrator.effective_timestep
-
-
-integrator = integrators.HMCRESPAIntegrator(temperature, steps_per_hmc=10, timestep=timestep, groups=groups)
+integrator = hmc_integrators.XCHMCRESPAIntegrator(temperature, steps_per_hmc=10, timestep=timestep, extra_chances=extra_chances, groups=groups)
 context = lb_loader.build(system, integrator, positions, temperature)
 integrator.step(40)
 output = integrator.vstep(10)
 integrator.effective_timestep
 
 
-integrator = integrators.GHMCRESPAIntegrator(temperature, steps_per_hmc=10, timestep=timestep, collision_rate=1.0 / u.picoseconds, groups=groups)
+integrator = hmc_integrators.HMCRESPAIntegrator(temperature, steps_per_hmc=10, timestep=timestep, groups=groups)
+context = lb_loader.build(system, integrator, positions, temperature)
+integrator.step(40)
+output = integrator.vstep(10)
+integrator.effective_timestep
+
+
+integrator = hmc_integrators.GHMCRESPAIntegrator(temperature, steps_per_hmc=10, timestep=timestep, collision_rate=1.0 / u.picoseconds, groups=groups)
 context = lb_loader.build(system, integrator, positions, temperature)
 integrator.step(40)
 output = integrator.vstep(10)

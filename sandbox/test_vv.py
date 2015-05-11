@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import simtk.openmm as mm
 from simtk import unit as u
-from openmmtools import integrators, testsystems
+from openmmtools import hmc_integrators, testsystems
 pd.set_option('display.width', 1000)
 
 n_steps = 3000
@@ -38,7 +38,7 @@ integrator.step(2)
 
 
 
-integrator = integrators.VelocityVerletIntegrator(timestep)
+integrator = hmc_integrators.VelocityVerletIntegrator(timestep)
 context = mm.Context(system, integrator)
 context.setPositions(positions)
 context.setVelocitiesToTemperature(temperature)
@@ -50,7 +50,7 @@ integrator.step(2)
 
 
 
-integrator = integrators.GHMC2(temperature, 100, timestep)
+integrator = hmc_integrators.GHMC2(temperature, 100, timestep)
 context = mm.Context(system, integrator)
 context.setPositions(positions)
 context.setVelocitiesToTemperature(temperature)
@@ -59,7 +59,7 @@ integrator.step(2)
 %timeit integrator.step(2)
 
 
-integrator = integrators.GHMC2(temperature, 50, timestep)
+integrator = hmc_integrators.GHMC2(temperature, 50, timestep)
 integrator.getNumComputations()
 context = mm.Context(system, integrator)
 context.setPositions(positions)
@@ -73,7 +73,7 @@ for k in range(integrator.getNumComputations()):
 
 
 groups = [(0, 1)]
-integrator = integrators.GHMCRESPA(temperature, 50, timestep, collision_rate, groups)
+integrator = hmc_integrators.GHMCRESPA(temperature, 50, timestep, collision_rate, groups)
 integrator.getNumComputations()
 
 context = mm.Context(system, integrator)

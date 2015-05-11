@@ -1,4 +1,4 @@
-from openmmtools import integrators, testsystems
+from openmmtools import hmc_integrators, testsystems
 import pymbar
 import pandas as pd
 import time
@@ -127,28 +127,28 @@ def load(sysname):
 
     if sysname == "ljbox":
         testsystem, system, positions = load_lj()
-        integrators.guess_force_groups(system, nonbonded=0, fft=0)
+        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
         timestep = 16 * u.femtoseconds
 
     if sysname == "longljbox":
         testsystem, system, positions = load_lj(cutoff=1.333*u.nanometers)
-        integrators.guess_force_groups(system, nonbonded=0, fft=0)
+        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
         timestep = 16 * u.femtoseconds
 
     if sysname == "shortljbox":
         testsystem, system, positions = load_lj(cutoff=0.75*u.nanometers)
-        integrators.guess_force_groups(system, nonbonded=0, fft=0)
+        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
         timestep = 16 * u.femtoseconds        
 
     if sysname == "switchedljbox":
         testsystem, system, positions = load_lj(switch_width=0.1*u.nanometers)
-        integrators.guess_force_groups(system, nonbonded=0, fft=0)
+        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
         timestep = 16 * u.femtoseconds        
@@ -156,7 +156,7 @@ def load(sysname):
 
     if sysname == "switchedshortljbox":
         testsystem, system, positions = load_lj(cutoff=0.75*u.nanometers, switch_width=0.1*u.nanometers)
-        integrators.guess_force_groups(system, nonbonded=0, fft=0)
+        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
         timestep = 16 * u.femtoseconds        
@@ -164,7 +164,7 @@ def load(sysname):
     if sysname == "cluster":
         testsystem = testsystems.LennardJonesCluster(nx=8, ny=8, nz=8)
         system, positions = testsystem.system, testsystem.positions
-        integrators.guess_force_groups(system, nonbonded=0)
+        hmc_integrators.guess_force_groups(system, nonbonded=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
         timestep = 40 * u.femtoseconds
@@ -172,7 +172,7 @@ def load(sysname):
     if sysname == "shortbigcluster":
         testsystem = testsystems.LennardJonesCluster(nx=20, ny=20, nz=20, cutoff=0.75*u.nanometers)
         system, positions = testsystem.system, testsystem.positions
-        integrators.guess_force_groups(system, nonbonded=0)
+        hmc_integrators.guess_force_groups(system, nonbonded=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
         timestep = 10 * u.femtoseconds
@@ -180,7 +180,7 @@ def load(sysname):
     if sysname == "switchedshortbigcluster":
         testsystem = testsystems.LennardJonesCluster(nx=20, ny=20, nz=20, cutoff=0.75*u.nanometers, switch_width=0.1*u.nanometers)
         system, positions = testsystem.system, testsystem.positions
-        integrators.guess_force_groups(system, nonbonded=0)
+        hmc_integrators.guess_force_groups(system, nonbonded=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
         timestep = 10 * u.femtoseconds        
@@ -188,7 +188,7 @@ def load(sysname):
     if sysname == "bigcluster":
         testsystem = testsystems.LennardJonesCluster(nx=20, ny=20, nz=20, cutoff=1.25*u.nanometers)
         system, positions = testsystem.system, testsystem.positions
-        integrators.guess_force_groups(system, nonbonded=0)
+        hmc_integrators.guess_force_groups(system, nonbonded=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
         timestep = 10 * u.femtoseconds
@@ -196,7 +196,7 @@ def load(sysname):
     if sysname == "shortcluster":
         testsystem = testsystems.LennardJonesCluster(nx=8, ny=8, nz=8, cutoff=0.75*u.nanometers)
         system, positions = testsystem.system, testsystem.positions
-        integrators.guess_force_groups(system, nonbonded=0)
+        hmc_integrators.guess_force_groups(system, nonbonded=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
         timestep = 40 * u.femtoseconds
@@ -204,34 +204,34 @@ def load(sysname):
     if sysname == "water":
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
-        integrators.guess_force_groups(system, nonbonded=0, fft=1)
+        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
         groups = [(0, 2), (1, 1)]
         timestep = 3 * u.femtoseconds
 
     if sysname == "rfwater":
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, nonbondedMethod=app.CutoffPeriodic)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
-        integrators.guess_force_groups(system, nonbonded=0, fft=1)
+        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
         groups = [(0, 2), (1, 1)]
         timestep = 3 * u.femtoseconds
 
     if sysname == "longrfwater":
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, nonbondedMethod=app.CutoffPeriodic, cutoff=1.3*u.nanometers, switch_width=1.0*u.angstroms)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
-        integrators.guess_force_groups(system, nonbonded=0, fft=1)
+        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
         groups = [(0, 2), (1, 1)]
         timestep = 3 * u.femtoseconds
 
     if sysname == "density":
         system, positions = load_lb(hydrogenMass=3.0 * u.amu)
-        integrators.guess_force_groups(system, nonbonded=1, fft=1, others=0)
+        hmc_integrators.guess_force_groups(system, nonbonded=1, fft=1, others=0)
         groups = [(0, 4), (1, 1)]
         timestep = 2.0 * u.femtoseconds
 
     if sysname == "dhfr":
         testsystem = testsystems.DHFRExplicit(nonbondedCutoff=cutoff, nonbondedMethod=app.PME)
         system, positions = testsystem.system, testsystem.positions
-        integrators.guess_force_groups(system, nonbonded=1, fft=1, others=0)
+        hmc_integrators.guess_force_groups(system, nonbonded=1, fft=1, others=0)
         groups = [(0, 4), (1, 1)]
         timestep = 1.0 * u.femtoseconds
 

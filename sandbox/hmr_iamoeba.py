@@ -4,7 +4,7 @@ import pandas as pd
 import simtk.openmm as mm
 from simtk.openmm import app
 from simtk import unit as u
-from openmmtools import integrators, testsystems
+from openmmtools import hmc_integrators, testsystems
 pd.set_option('display.width', 1000)
 
 pdb = app.PDBFile("./sandbox/iamoeba.pdb")
@@ -31,7 +31,7 @@ for hydrogenMass in masses:
     timestep = 0.5 * u.femtoseconds
     steps_per_hmc = 12
 
-    integrator = integrators.GHMCIntegrator(temperature, steps_per_hmc, timestep)
+    integrator = hmc_integrators.GHMCIntegrator(temperature, steps_per_hmc, timestep)
     context = mm.Context(system, integrator)
     context.setPositions(positions)
     context.setVelocitiesToTemperature(temperature)
@@ -40,7 +40,7 @@ for hydrogenMass in masses:
     integrator.step(n_steps)
 
 
-    integrator = integrators.GHMCIntegrator(temperature, steps_per_hmc, timestep)
+    integrator = hmc_integrators.GHMCIntegrator(temperature, steps_per_hmc, timestep)
     context = mm.Context(system, integrator)
     context.setPositions(positions)
     context.setVelocitiesToTemperature(temperature)
