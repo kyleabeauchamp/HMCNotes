@@ -106,11 +106,7 @@ def build(system, integrator, positions, temperature, precision="mixed"):
     return context
 
 def load_lj(cutoff=None, dispersion_correction=False, switch_width=None):
-    if switch_width is None:
-        switch = False
-    else:
-        switch = True
-    testsystem = testsystems.LennardJonesFluid(dispersion_correction=dispersion_correction, cutoff=cutoff, switch=switch, switch_width=switch_width)
+    testsystem = testsystems.LennardJonesFluid(dispersion_correction=dispersion_correction, cutoff=cutoff, switch_width=switch_width)
 
     system, positions = testsystem.system, testsystem.positions
 
@@ -215,6 +211,13 @@ def load(sysname):
         groups = [(0, 2), (1, 1)]
         timestep = 3 * u.femtoseconds
 
+    if sysname == "switchedrfwater":
+        testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, nonbondedMethod=app.CutoffPeriodic, switch_width=3.0*u.angstroms)  # Around 1060 molecules of water
+        system, positions = testsystem.system, testsystem.positions
+        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
+        groups = [(0, 2), (1, 1)]
+        timestep = 3 * u.femtoseconds
+
     if sysname == "longrfwater":
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, nonbondedMethod=app.CutoffPeriodic, cutoff=1.3*u.nanometers, switch_width=1.0*u.angstroms)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
@@ -245,7 +248,7 @@ def load(sysname):
 
     if sysname == "customho":
         timestep = 50.0 * u.femtoseconds
-        testsystem = testsystems.CustomPotentialTestSystem()
+        testsystem = testsystems.CustomExternalForcesTestSystem()
         system, positions = testsystem.system, testsystem.positions
         groups = [(0, 1)]
 
