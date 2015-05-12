@@ -198,32 +198,32 @@ def load(sysname):
         timestep = 40 * u.femtoseconds
 
     if sysname == "water":
-        testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers)  # Around 1060 molecules of water
+        testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=1.1*u.nanometers)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
         groups = [(0, 2), (1, 1)]
         timestep = 3 * u.femtoseconds
 
     if sysname == "rfwater":
-        testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, nonbondedMethod=app.CutoffPeriodic)  # Around 1060 molecules of water
+        testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=1.1*u.nanometers, nonbondedMethod=app.CutoffPeriodic)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
         groups = [(0, 2), (1, 1)]
-        timestep = 3 * u.femtoseconds
+        timestep = 2 * u.femtoseconds
 
     if sysname == "switchedrfwater":
-        testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, nonbondedMethod=app.CutoffPeriodic, switch_width=3.0*u.angstroms)  # Around 1060 molecules of water
+        testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=1.1*u.nanometers, nonbondedMethod=app.CutoffPeriodic, switch_width=3.0*u.angstroms)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
         groups = [(0, 2), (1, 1)]
-        timestep = 3 * u.femtoseconds
+        timestep = 2 * u.femtoseconds
 
     if sysname == "longrfwater":
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, nonbondedMethod=app.CutoffPeriodic, cutoff=1.3*u.nanometers, switch_width=1.0*u.angstroms)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
         groups = [(0, 2), (1, 1)]
-        timestep = 3 * u.femtoseconds
+        timestep = 2 * u.femtoseconds
 
     if sysname == "density":
         system, positions = load_lb(hydrogenMass=3.0 * u.amu)
