@@ -106,7 +106,7 @@ def build(system, integrator, positions, temperature, precision="mixed"):
     return context
 
 def load_lj(cutoff=None, dispersion_correction=False, switch_width=None):
-    testsystem = testsystems.LennardJonesFluid(n_particles=500, dispersion_correction=dispersion_correction, cutoff=cutoff, switch_width=switch_width)
+    testsystem = testsystems.LennardJonesFluid(nparticles=500, dispersion_correction=dispersion_correction, cutoff=cutoff, switch_width=switch_width)
 
     system, positions = testsystem.system, testsystem.positions
 
