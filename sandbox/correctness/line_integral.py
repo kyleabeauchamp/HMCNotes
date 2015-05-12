@@ -1,7 +1,9 @@
+import scipy.integrate
 import simtk.openmm as mm
 import pandas as pd
 
 box = 4.0
+cutoff = box / 2.
 
 system = mm.System()
 system.setDefaultPeriodicBoxVectors((box, 0, 0), (0, box, 0), (0, 0, box))
@@ -9,11 +11,12 @@ system.addParticle(1.0)
 system.addParticle(1.0)
 
 f = mm.NonbondedForce()
-f.setCutoffDistance(box / 2.)
+f.setCutoffDistance(cutoff)
 f.setNonbondedMethod(mm.NonbondedForce.CutoffPeriodic)
 
 f.setUseDispersionCorrection(False)
 f.setUseSwitchingFunction(False)
+f.setSwitchingDistance(0.9 * cutoff)
 
 f.addParticle(0.0, 1.0, 1.0)
 f.addParticle(0.0, 1.0, 1.0)
@@ -55,10 +58,21 @@ for i in range(n):
 
 data = pd.DataFrame(data)
 
-plot(data.xcur, data.ecur)
+plot(data.xcur, data.ecur, label="OMM energy")
 xlabel("position")
 ylabel("energy")
+
+integrated = scipy.integrate.cumtrapz(-1 * data.fcur.values)
+integrated /= -1. * integrated.min()
+plot(data.xcur[:-1], integrated, 'g', label="integrated force")
+legend(loc=0)
+
+
+
+
 figure()
 plot(data.xcur, data.fcur)
 xlabel("position")
 ylabel("force (1 component)")
+
+
