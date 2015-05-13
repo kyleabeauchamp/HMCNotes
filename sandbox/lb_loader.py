@@ -234,6 +234,14 @@ def load(sysname):
         groups = [(0, 2), (1, 1)]
         timestep = 1.5 * u.femtoseconds
 
+    if sysname == "longswitchedrfwater":
+        testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=1.5*u.nanometers, nonbondedMethod=app.CutoffPeriodic, switch_width=3.0*u.angstroms)  # Around 1060 molecules of water
+        system, positions = testsystem.system, testsystem.positions
+        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
+        groups = [(0, 2), (1, 1)]
+        timestep = 1.5 * u.femtoseconds
+
+
     if sysname == "density":
         system, positions = load_lb(hydrogenMass=3.0 * u.amu)
         hmc_integrators.guess_force_groups(system, nonbonded=1, fft=1, others=0)
