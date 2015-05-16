@@ -15,7 +15,7 @@ def pre_equil(system, positions, temperature):
     integrator.step(5000)
     positions = context.getState(getPositions=True).getPositions()
     return positions
-    
+
 
 def load_lb(cutoff=1.1 * u.nanometers, constraints=app.HBonds, hydrogenMass=1.0 * u.amu):
     prmtop_filename = "./input/126492-54-4_1000_300.6.prmtop"
@@ -37,40 +37,40 @@ def set_masses(system):
 def load_amoeba(hydrogenMass=1.0):
     pdb = app.PDBFile("./sandbox/iamoeba.pdb")
     forcefield = app.ForceField('iamoeba.xml')
-    system = forcefield.createSystem(pdb.topology, nonbondedMethod=app.PME, nonbondedCutoff=1.0*u.nanometers, hydrogenMass=hydrogenMass * u.amu, rigidWater=False)    
+    system = forcefield.createSystem(pdb.topology, nonbondedMethod=app.PME, nonbondedCutoff=1.0*u.nanometers, hydrogenMass=hydrogenMass * u.amu, rigidWater=False)
     return system, pdb.positions
 
 
 def converge(context, n_steps=1, Neff_cutoff=1E4, sleep_time=45, filename=None):
     integrator = context.getIntegrator()
-    
+
     data = None
-    
+
     t00 = time.time()
     t0 = time.time() - t00
     t1 = time.time() - t00
-    
+
     while True:
         integrator.step(n_steps)
         if type(integrator) in ["XHMCIntegrator", "XHMCRESPAIntegrator"]:
             if integrator.getGlobalVariableByName("a") != 1.:
                 continue
-        
+
         state = context.getState(getEnergy=True)
         energy = state.getPotentialEnergy() / u.kilojoules_per_mole
-        
+
         current_data = dict(energy=energy)
-        
+
         if data is None:
             data = pd.DataFrame([current_data])
         else:
             data.ix[len(data)] = current_data
 
         t1 = time.time() - t00
-        
+
         if t1 - t0 < sleep_time:
             continue
-        
+
         energies = data.energy.values
         #[start, g, Neff] = pymbar.timeseries.detectEquilibration(energies, nskip=1000)  # THIS IS TOO SLOW FOR ITERATIVE USE!
         start = 0  # Requires some pre-equilibration
@@ -80,12 +80,12 @@ def converge(context, n_steps=1, Neff_cutoff=1E4, sleep_time=45, filename=None):
         mu = energies[start:].mean()
         sigma = energies[start:].std()
         stderr = sigma * Neff ** -0.5
-        
+
         print("t0=%f, energy = %.4f + %.3f, N=%d, start=%d, g=%.4f, Neff=%.4f, stderr=%f" % (t0, mu, sigma, len(energies), start, g, Neff, stderr))
-        
+
         if filename is not None:
             data.to_csv(filename)
-        
+
         t0 = t1
 
         if Neff > Neff_cutoff:
@@ -100,13 +100,13 @@ def build(system, integrator, positions, temperature, precision="mixed"):
     except:
         print("Warning: no CUDA platform found, not specifying precision.")
         context = mm.Context(system, integrator)
-    
+
     context.setPositions(positions)
     context.setVelocitiesToTemperature(temperature)
     return context
 
-def load_lj(cutoff=None, dispersion_correction=False, switch_width=None):
-    testsystem = testsystems.LennardJonesFluid(nparticles=500, dispersion_correction=dispersion_correction, cutoff=cutoff, switch_width=switch_width)
+def load_lj(cutoff=None, dispersion_correction=False, switch_width=None, shift=False):
+    testsystem = testsystems.LennardJonesFluid(nparticles=500, dispersion_correction=dispersion_correction, cutoff=cutoff, switch_width=switch_width, shift=shift)
 
     system, positions = testsystem.system, testsystem.positions
 
@@ -114,7 +114,7 @@ def load_lj(cutoff=None, dispersion_correction=False, switch_width=None):
     length = 2.66723326712
     boxes = ((length, 0, 0), (0, length, 0), (0, 0, length))
     system.setDefaultPeriodicBoxVectors(*boxes)
-    
+
     return testsystem, system, positions
 
 def load(sysname):
@@ -140,14 +140,22 @@ def load(sysname):
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
-        timestep = 16 * u.femtoseconds        
+        timestep = 16 * u.femtoseconds
+
+    if sysname == "shiftedljbox":
+        testsystem, system, positions = load_lj(shift=True)
+        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
+        groups = [(0, 1)]
+        temperature = 25. * u.kelvin
+        timestep = 16 * u.femtoseconds
+
 
     if sysname == "switchedljbox":
         testsystem, system, positions = load_lj(switch_width=0.34*u.nanometers)
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
-        timestep = 16 * u.femtoseconds        
+        timestep = 16 * u.femtoseconds
 
 
     if sysname == "switchedshortljbox":
@@ -155,7 +163,7 @@ def load(sysname):
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
-        timestep = 16 * u.femtoseconds        
+        timestep = 16 * u.femtoseconds
 
     if sysname == "cluster":
         testsystem = testsystems.LennardJonesCluster(nx=8, ny=8, nz=8)
@@ -172,14 +180,14 @@ def load(sysname):
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
         timestep = 10 * u.femtoseconds
-    
+
     if sysname == "switchedshortbigcluster":
         testsystem = testsystems.LennardJonesCluster(nx=20, ny=20, nz=20, cutoff=0.75*u.nanometers, switch_width=0.1*u.nanometers)
         system, positions = testsystem.system, testsystem.positions
         hmc_integrators.guess_force_groups(system, nonbonded=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
-        timestep = 10 * u.femtoseconds        
+        timestep = 10 * u.femtoseconds
 
     if sysname == "bigcluster":
         testsystem = testsystems.LennardJonesCluster(nx=20, ny=20, nz=20, cutoff=1.25*u.nanometers)
