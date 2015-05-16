@@ -27,7 +27,6 @@ Neff_cutoff = 1E5
 
 itype = "LangevinIntegrator"
 
-
 integrator = mm.LangevinIntegrator(temperature, collision_rate, langevin_timestep)
 context = lb_loader.build(system, integrator, positions, temperature, precision=precision)
 filename = "./data/%s_%s_%s_%.3f_%d.csv" % (precision, sysname, itype, langevin_timestep / u.femtoseconds, collision_rate * u.picoseconds)
