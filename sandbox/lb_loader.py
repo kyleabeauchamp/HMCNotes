@@ -120,6 +120,7 @@ def load_lj(cutoff=None, dispersion_correction=False, switch_width=None, shift=F
 def load(sysname):
     cutoff = 0.9 * u.nanometers
     temperature = 300. * u.kelvin
+    langevin_timestep = 0.5 * u.femtoseconds
 
     if sysname == "ljbox":
         testsystem, system, positions = load_lj()
@@ -127,6 +128,7 @@ def load(sysname):
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
         timestep = 16 * u.femtoseconds
+        langevin_timestep = 2 * u.femtoseconds
 
     if sysname == "longljbox":
         testsystem, system, positions = load_lj(cutoff=1.333*u.nanometers)
@@ -134,6 +136,7 @@ def load(sysname):
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
         timestep = 16 * u.femtoseconds
+        langevin_timestep = 2 * u.femtoseconds
 
     if sysname == "shortljbox":
         testsystem, system, positions = load_lj(cutoff=0.90*u.nanometers)
@@ -141,6 +144,7 @@ def load(sysname):
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
         timestep = 16 * u.femtoseconds
+        langevin_timestep = 2 * u.femtoseconds
 
     if sysname == "shiftedljbox":
         testsystem, system, positions = load_lj(shift=True)
@@ -148,6 +152,7 @@ def load(sysname):
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
         timestep = 16 * u.femtoseconds
+        langevin_timestep = 2 * u.femtoseconds
 
 
     if sysname == "switchedljbox":
@@ -156,6 +161,7 @@ def load(sysname):
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
         timestep = 16 * u.femtoseconds
+        langevin_timestep = 2 * u.femtoseconds
 
 
     if sysname == "switchedshortljbox":
@@ -164,6 +170,7 @@ def load(sysname):
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
         timestep = 16 * u.femtoseconds
+        langevin_timestep = 2 * u.femtoseconds
 
     if sysname == "cluster":
         testsystem = testsystems.LennardJonesCluster(nx=8, ny=8, nz=8)
@@ -284,4 +291,4 @@ def load(sysname):
         system, positions = testsystem.system, testsystem.positions
         groups = [(0, 2), (1, 1)]
 
-    return system, positions, groups, temperature, timestep, testsystem
+    return system, positions, groups, temperature, timestep, langevin_timestep, testsystem
