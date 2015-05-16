@@ -1,3 +1,4 @@
+import pickle
 import os
 import lb_loader
 import pandas as pd
@@ -7,16 +8,18 @@ import simtk.openmm as mm
 from simtk import unit as u
 from openmmtools import hmc_integrators, testsystems
 
-precision = "single"
+precision = "mixed"
 
-sysname = "switchedshortbigcluster"
+sysname = "shiftedljbox"
 
-system, positions, groups, temperature, timestep, testsystem = lb_loader.load(sysname)
+system, positions, groups, temperature, timestep, langevin_timestep, testsystem = lb_loader.load(sysname)
 
-integrator = mm.LangevinIntegrator(temperature, 1.0 / u.picoseconds, timestep / 4.)
+integrator = hmc_integrators.HMCIntegrator(temperature, steps_per_hmc=25, timestep=timestep)
 context = lb_loader.build(system, integrator, positions, temperature)
-integrator.step(50000)
-positions = context.getState(getPositions=True).getPositions()
+mm.LocalEnergyMinimizer.minimize(context)
+integrator.step(20000)
+integrator.acceptance_rate
+
 
 collision_rate = 1.0 / u.picoseconds
 n_steps = 25
