@@ -106,14 +106,15 @@ def build(system, integrator, positions, temperature, precision="mixed"):
     return context
 
 def load_lj(cutoff=None, dispersion_correction=False, switch_width=None, shift=False):
-    testsystem = testsystems.LennardJonesFluid(nparticles=500, dispersion_correction=dispersion_correction, cutoff=cutoff, switch_width=switch_width, shift=shift)
+    reduced_density = 0.3
+    testsystem = testsystems.LennardJonesFluid(nparticles=2000, reduced_density=reduced_density, dispersion_correction=dispersion_correction, cutoff=cutoff, switch_width=switch_width, shift=shift)
 
     system, positions = testsystem.system, testsystem.positions
 
-    positions = np.loadtxt("./sandbox/ljbox.dat")
-    length = 2.66723326712
-    boxes = ((length, 0, 0), (0, length, 0), (0, 0, length))
-    system.setDefaultPeriodicBoxVectors(*boxes)
+    #positions = np.loadtxt("./sandbox/ljbox.dat")
+    #length = 2.66723326712
+    #boxes = ((length, 0, 0), (0, length, 0), (0, 0, length))
+    #system.setDefaultPeriodicBoxVectors(*boxes)
 
     return testsystem, system, positions
 
