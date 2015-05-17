@@ -106,17 +106,22 @@ def build(system, integrator, positions, temperature, precision="mixed"):
     return context
 
 def load_lj(cutoff=None, dispersion_correction=False, switch_width=None, shift=False):
-    reduced_density = 0.3
-    testsystem = testsystems.LennardJonesFluid(nparticles=2000, reduced_density=reduced_density, dispersion_correction=dispersion_correction, cutoff=cutoff, switch_width=switch_width, shift=shift)
+    reduced_density = 0.90
+    testsystem = testsystems.LennardJonesFluid(nparticles=2048, reduced_density=reduced_density,
+    dispersion_correction=dispersion_correction, cutoff=cutoff, switch_width=switch_width, shift=shift, lattice=True)
 
     system, positions = testsystem.system, testsystem.positions
+
+    timestep = 2 * u.femtoseconds
+    langevin_timestep = 2 * u.femtoseconds
+
 
     #positions = np.loadtxt("./sandbox/ljbox.dat")
     #length = 2.66723326712
     #boxes = ((length, 0, 0), (0, length, 0), (0, 0, length))
     #system.setDefaultPeriodicBoxVectors(*boxes)
 
-    return testsystem, system, positions
+    return testsystem, system, positions, timestep, langevin_timestep
 
 def load(sysname):
     cutoff = 0.9 * u.nanometers
@@ -124,54 +129,40 @@ def load(sysname):
     langevin_timestep = 0.5 * u.femtoseconds
 
     if sysname == "ljbox":
-        testsystem, system, positions = load_lj()
+        testsystem, system, positions, timestep, langevin_timestep = load_lj()
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
-        timestep = 16 * u.femtoseconds
-        langevin_timestep = 2 * u.femtoseconds
 
     if sysname == "longljbox":
-        testsystem, system, positions = load_lj(cutoff=1.333*u.nanometers)
+        testsystem, system, positions, timestep, langevin_timestep = load_lj(cutoff=1.333*u.nanometers)
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
-        timestep = 16 * u.femtoseconds
-        langevin_timestep = 2 * u.femtoseconds
 
     if sysname == "shortljbox":
-        testsystem, system, positions = load_lj(cutoff=0.90*u.nanometers)
+        testsystem, system, positions, timestep, langevin_timestep = load_lj(cutoff=0.90*u.nanometers)
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
-        timestep = 16 * u.femtoseconds
-        langevin_timestep = 2 * u.femtoseconds
 
     if sysname == "shiftedljbox":
-        testsystem, system, positions = load_lj(shift=True)
+        testsystem, system, positions, timestep, langevin_timestep = load_lj(shift=True)
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
-        timestep = 16 * u.femtoseconds
-        langevin_timestep = 2 * u.femtoseconds
-
 
     if sysname == "switchedljbox":
-        testsystem, system, positions = load_lj(switch_width=0.34*u.nanometers)
+        testsystem, system, positions, timestep, langevin_timestep = load_lj(switch_width=0.34*u.nanometers)
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
-        timestep = 16 * u.femtoseconds
-        langevin_timestep = 2 * u.femtoseconds
-
 
     if sysname == "switchedshortljbox":
-        testsystem, system, positions = load_lj(cutoff=0.90*u.nanometers, switch_width=0.34*u.nanometers)
+        testsystem, system, positions, timestep, langevin_timestep = load_lj(cutoff=0.90*u.nanometers, switch_width=0.34*u.nanometers)
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
-        timestep = 16 * u.femtoseconds
-        langevin_timestep = 2 * u.femtoseconds
 
     if sysname == "cluster":
         testsystem = testsystems.LennardJonesCluster(nx=8, ny=8, nz=8)
