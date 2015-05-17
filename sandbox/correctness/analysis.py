@@ -32,8 +32,6 @@ for filename in filenames:
 
 data = pd.DataFrame(data)
 data = data.sort("timestep")[::-1].sort("integrator")[::-1].sort("precision").sort("sysname")
-data["true"] = data.sysname.map(lambda x: true[x])
-
 
 for (precision, integrator, sysname), x in data.groupby(("precision", "integrator", "sysname")):
     if integrator != "LangevinIntegrator":
@@ -45,11 +43,10 @@ for (precision, integrator, sysname), x in data.groupby(("precision", "integrato
     b = b[ind][0:2]
     slope, intercept, _, _, _ = scipy.stats.linregress(a, b)
 
-data["error"] = data.mu - data.true
-data["relerror"] = data.error / data.true
+
 data["pval"] = np.nan
 #data[["sysname", "integrator", "mu", "stderr", "Neff", "timestep"]]
-data = data.drop(["start", "friction"], axis=1)
+data = data.drop(["start", "friction", "Neff", "g"], axis=1)
 
 for (precision, sysname), di in data.groupby(["precision", "sysname"]):
     x = di.set_index("integrator").ix["LangevinIntegrator"].samples

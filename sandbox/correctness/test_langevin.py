@@ -10,7 +10,7 @@ from openmmtools import hmc_integrators, testsystems
 
 precision = "mixed"
 
-sysname = "shiftedljbox"
+sysname = "switchedljbox"
 
 system, positions, groups, temperature, timestep, langevin_timestep, testsystem = lb_loader.load(sysname)
 

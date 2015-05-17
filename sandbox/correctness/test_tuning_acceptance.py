@@ -10,14 +10,17 @@ from openmmtools import hmc_integrators, testsystems
 
 precision = "mixed"
 
-sysname = "shiftedljbox"
+sysname = "ljbox"
 
 system, positions, groups, temperature, timestep, langevin_timestep, testsystem = lb_loader.load(sysname)
 
 integrator = hmc_integrators.HMCIntegrator(temperature, steps_per_hmc=25, timestep=timestep)
 context = lb_loader.build(system, integrator, positions, temperature)
+context.getState(getEnergy=True).getPotentialEnergy()
 mm.LocalEnergyMinimizer.minimize(context)
-integrator.step(20000)
+context.getState(getEnergy=True).getPotentialEnergy()
+integrator.step(300)
+context.getState(getEnergy=True).getPotentialEnergy()
 integrator.acceptance_rate
 
 
