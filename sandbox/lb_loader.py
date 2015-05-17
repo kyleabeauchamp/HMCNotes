@@ -105,10 +105,10 @@ def build(system, integrator, positions, temperature, precision="mixed"):
     context.setVelocitiesToTemperature(temperature)
     return context
 
-def load_lj(cutoff=None, dispersion_correction=False, switch_width=None, shift=False, charge=None):
+def load_lj(cutoff=None, dispersion_correction=False, switch_width=None, shift=False, charge=None, ewaldErrorTolerance=None):
     reduced_density = 0.90
     testsystem = testsystems.LennardJonesFluid(nparticles=2048, reduced_density=reduced_density,
-    dispersion_correction=dispersion_correction, cutoff=cutoff, switch_width=switch_width, shift=shift, lattice=True, charge=charge)
+    dispersion_correction=dispersion_correction, cutoff=cutoff, switch_width=switch_width, shift=shift, lattice=True, charge=charge, ewaldErrorTolerance=ewaldErrorTolerance)
 
     system, positions = testsystem.system, testsystem.positions
 
@@ -151,6 +151,14 @@ def load(sysname):
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
+
+    if sysname == "chargedswitchedaccuratelongljbox":
+        testsystem, system, positions, timestep, langevin_timestep = load_lj(cutoff=1.333*u.nanometers, charge=0.15*u.elementary_charge, switch_width=0.34*u.nanometers, ewaldErrorTolerance=5E-5)
+        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
+        groups = [(0, 1)]
+        temperature = 25. * u.kelvin
+
+
 
     if sysname == "ljbox":
         testsystem, system, positions, timestep, langevin_timestep = load_lj()
