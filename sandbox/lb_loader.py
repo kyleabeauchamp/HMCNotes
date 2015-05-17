@@ -113,7 +113,7 @@ def load_lj(cutoff=None, dispersion_correction=False, switch_width=None, shift=F
     system, positions = testsystem.system, testsystem.positions
 
     timestep = 2 * u.femtoseconds
-    langevin_timestep = 2 * u.femtoseconds
+    langevin_timestep = 0.5 * u.femtoseconds
 
 
     #positions = np.loadtxt("./sandbox/ljbox.dat")
