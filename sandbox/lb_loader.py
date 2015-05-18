@@ -270,6 +270,13 @@ def load(sysname):
         groups = [(0, 2), (1, 1)]
         timestep = 1.5 * u.femtoseconds
 
+    if sysname == "switchedaccuratewater":
+        testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=1.1*u.nanometers, switch_width=3.0*u.angstroms, ewaldErrorTolerance=5E-5)  # Around 1060 molecules of water
+        system, positions = testsystem.system, testsystem.positions
+        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
+        groups = [(0, 2), (1, 1)]
+        timestep = 1.5 * u.femtoseconds
+
     if sysname == "longswitchedwater":
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=1.5*u.nanometers, switch_width=3.0*u.angstroms)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
