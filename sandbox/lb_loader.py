@@ -158,6 +158,11 @@ def load(sysname):
         groups = [(0, 1)]
         temperature = 25. * u.kelvin
 
+    if sysname == "chargedswitchedaccurateljbox":
+        testsystem, system, positions, timestep, langevin_timestep = load_lj(charge=0.15*u.elementary_charge, switch_width=0.34*u.nanometers, ewaldErrorTolerance=5E-5)
+        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
+        groups = [(0, 1)]
+        temperature = 25. * u.kelvin
 
 
     if sysname == "ljbox":
