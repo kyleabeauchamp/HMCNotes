@@ -128,6 +128,15 @@ def load(sysname):
     temperature = 300. * u.kelvin
     langevin_timestep = 0.5 * u.femtoseconds
 
+    if sysname == "diatomicfluid":
+        testsystem = testsystems.DiatomicFluid(nmolecules=1000, reduced_density=1.0, charge=0.25*u.elementary_charge, switch_width=None, constraint=True)
+        system, positions = testsystem.system, testsystem.positions
+        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
+        groups = [(0, 1)]
+        temperature = 25. * u.kelvin
+        timestep = 2 * u.femtoseconds
+
+
     if sysname == "chargedljbox":
         testsystem, system, positions, timestep, langevin_timestep = load_lj(charge=0.15*u.elementary_charge)
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
