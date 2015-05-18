@@ -129,7 +129,7 @@ def load(sysname):
     langevin_timestep = 0.5 * u.femtoseconds
 
     if sysname == "diatomicfluid":
-        testsystem = testsystems.DiatomicFluid(nmolecules=1000, reduced_density=1.0, charge=0.25*u.elementary_charge, switch_width=None, constraint=True)
+        testsystem = testsystems.DiatomicFluid(nmolecules=1000, reduced_density=0.75, charge=0.25*u.elementary_charge, switch_width=None, constraint=True)
         system, positions = testsystem.system, testsystem.positions
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
         groups = [(0, 1)]
