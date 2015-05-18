@@ -7,6 +7,31 @@ import numpy as np
 import simtk.openmm as mm
 from simtk import unit as u
 
+def equilibrate(system, temperature, positions, steps=40000, npt=False, minimize=True):
+
+    if npt:
+        barostat_index = system.addForce(mm.MonteCarloBarostat(1.0 * u.atmospheres, temperature, 10))
+        print(system.getDefaultPeriodicBoxVectors())
+
+    integrator = hmc_integrators.HMCIntegrator(temperature, steps_per_hmc=25, timestep=timestep)
+    context = lb_loader.build(system, integrator, positions, temperature)
+    if minimize:
+        mm.LocalEnergyMinimizer.minimize(context)
+    integrator.step(steps)
+
+    state = context.getState(getPositions=True, getParameters=True)
+    positions = state.getPositions()
+    boxes = state.getPeriodicBoxVectors()
+
+    print(integrator.acceptance_rate)
+
+    if npt:
+        system.removeForce(barostat_index)
+        system.setDefaultPeriodicBoxVectors(**boxes)
+        print(system.getDefaultPeriodicBoxVectors())
+    return positions, boxes
+
+
 def pre_equil(system, positions, temperature):
     integrator = mm.LangevinIntegrator(temperature, 1.0 / u.picoseconds, 0.5 * u.femtoseconds)
     context = mm.Context(system, integrator)
