@@ -14,7 +14,7 @@ def equilibrate(system, temperature, timestep, positions, steps=40000, npt=False
         print(system.getDefaultPeriodicBoxVectors())
 
     integrator = hmc_integrators.HMCIntegrator(temperature, steps_per_hmc=25, timestep=timestep)
-    context = lb_loader.build(system, integrator, positions, temperature)
+    context = build(system, integrator, positions, temperature)
     if minimize:
         mm.LocalEnergyMinimizer.minimize(context)
     integrator.step(steps)
