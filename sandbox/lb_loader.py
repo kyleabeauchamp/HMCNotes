@@ -7,7 +7,7 @@ import numpy as np
 import simtk.openmm as mm
 from simtk import unit as u
 
-def equilibrate(system, temperature, positions, steps=40000, npt=False, minimize=True):
+def equilibrate(system, temperature, timestep, positions, steps=40000, npt=False, minimize=True):
 
     if npt:
         barostat_index = system.addForce(mm.MonteCarloBarostat(1.0 * u.atmospheres, temperature, 10))
