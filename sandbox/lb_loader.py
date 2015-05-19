@@ -10,7 +10,7 @@ from simtk import unit as u
 def equilibrate(system, temperature, timestep, positions, steps=40000, npt=False, minimize=True):
 
     if npt:
-        barostat_index = system.addForce(mm.MonteCarloBarostat(1.0 * u.atmospheres, temperature, 10))
+        barostat_index = system.addForce(mm.MonteCarloBarostat(1.0 * u.atmospheres, temperature, 1))
         print(system.getDefaultPeriodicBoxVectors())
 
     integrator = hmc_integrators.HMCIntegrator(temperature, steps_per_hmc=25, timestep=timestep)
