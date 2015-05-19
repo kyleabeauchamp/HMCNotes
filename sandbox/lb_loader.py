@@ -27,7 +27,7 @@ def equilibrate(system, temperature, timestep, positions, steps=40000, npt=False
 
     if npt:
         system.removeForce(barostat_index)
-        system.setDefaultPeriodicBoxVectors(**boxes)
+        system.setDefaultPeriodicBoxVectors(*boxes)
         print(system.getDefaultPeriodicBoxVectors())
     return positions, boxes
 
