@@ -1,5 +1,3 @@
-import pickle
-import os
 import lb_loader
 import pandas as pd
 import simtk.openmm.app as app
@@ -10,7 +8,7 @@ from openmmtools import hmc_integrators, testsystems
 
 precision = "mixed"
 
-sysname = "ljbox"
+sysname = "diatomicfluid"
 
 system, positions, groups, temperature, timestep, langevin_timestep, testsystem = lb_loader.load(sysname)
 
@@ -22,6 +20,7 @@ context.getState(getEnergy=True).getPotentialEnergy()
 integrator.step(300)
 context.getState(getEnergy=True).getPotentialEnergy()
 integrator.acceptance_rate
+positions = context.getState(getPositions=True).getPositions()
 
 
 collision_rate = 1.0 / u.picoseconds

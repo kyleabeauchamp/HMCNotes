@@ -49,18 +49,26 @@ data["pval"] = np.nan
 data = data.drop(["start", "friction", "Neff", "g"], axis=1)
 
 for (precision, sysname), di in data.groupby(["precision", "sysname"]):
-    x = di.set_index("integrator").ix["LangevinIntegrator"].samples
     y = di.set_index("integrator").ix["HMCIntegrator"].samples
-    delta = di.set_index("integrator").ix["LangevinIntegrator"].mu - di.set_index("integrator").ix["HMCIntegrator"].mu
-    relerr = delta / di.set_index("integrator").ix["HMCIntegrator"].mu
-    tscore, pval = scipy.stats.ttest_ind(x, y, equal_var=False)
-    data.loc[(data.precision == precision) & (data.sysname == sysname), "tscore"] = tscore
-    data.loc[(data.precision == precision) & (data.sysname == sysname), "pval"] = pval
-    data.loc[(data.precision == precision) & (data.sysname == sysname), "relerr"] = relerr
-    data.loc[(data.precision == precision) & (data.sysname == sysname), "error"] = delta
+    mu0 = di.set_index("integrator").ix["HMCIntegrator"].mu
+    for (integrator, timestep), vi in di.set_index(["integrator", "timestep"]).iterrows():
+        print(precision, sysname, integrator, timestep)
+        x = vi.samples
+        mu = vi.mu
+        delta = mu - mu0
+        relerr = delta / mu0
+        tscore, pval = scipy.stats.ttest_ind(x, y, equal_var=False)
+        cond = (data.precision == precision) & (data.sysname == sysname) & (data.integrator == integrator) & (data.timestep == timestep)
+        data.loc[cond, "tscore"] = tscore
+        data.loc[cond, "pval"] = pval
+        data.loc[cond, "relerr"] = relerr
+        data.loc[cond, "error"] = delta
 
 
 data.drop("samples", axis=1)  # Printing the samples looks bad.
 
 
-data[data.sysname.isin(["ljbox", "switchedljbox", "shiftedljbox"])].drop("samples", axis=1)  # Printing the samples looks bad.
+print(data[data.sysname.isin(["ljbox", "switchedljbox", "shiftedljbox"])].drop("samples", axis=1))
+print(data[data.sysname.isin(["chargedljbox", "chargedswitchedljbox", "chargedswitchedaccurateljbox"])].drop("samples", axis=1))
+
+print(data[data.sysname.isin(["switchedaccuratewater"])].drop("samples", axis=1))
