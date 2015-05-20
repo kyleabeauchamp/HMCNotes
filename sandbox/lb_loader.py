@@ -166,37 +166,37 @@ def load(sysname):
     if sysname == "chargedljbox":
         testsystem, system, positions, timestep, langevin_timestep = load_lj(charge=0.15*u.elementary_charge)
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
-        groups = [(0, 1)]
+        groups = [(0, 2), (1, 1)]
         temperature = 25. * u.kelvin
 
     if sysname == "chargedswitchedljbox":
         testsystem, system, positions, timestep, langevin_timestep = load_lj(charge=0.15*u.elementary_charge, switch_width=0.34*u.nanometers)
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
-        groups = [(0, 1)]
+        groups = [(0, 2), (1, 1)]
         temperature = 25. * u.kelvin
 
     if sysname == "chargedlongljbox":
         testsystem, system, positions, timestep, langevin_timestep = load_lj(cutoff=1.333*u.nanometers, charge=0.15*u.elementary_charge)
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
-        groups = [(0, 1)]
+        groups = [(0, 2), (1, 1)]
         temperature = 25. * u.kelvin
 
     if sysname == "chargedswitchedlongljbox":
         testsystem, system, positions, timestep, langevin_timestep = load_lj(cutoff=1.333*u.nanometers, charge=0.15*u.elementary_charge, switch_width=0.34*u.nanometers)
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
-        groups = [(0, 1)]
+        groups = [(0, 2), (1, 1)]
         temperature = 25. * u.kelvin
 
     if sysname == "chargedswitchedaccuratelongljbox":
         testsystem, system, positions, timestep, langevin_timestep = load_lj(cutoff=1.333*u.nanometers, charge=0.15*u.elementary_charge, switch_width=0.34*u.nanometers, ewaldErrorTolerance=5E-5)
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
-        groups = [(0, 1)]
+        groups = [(0, 2), (1, 1)]
         temperature = 25. * u.kelvin
 
     if sysname == "chargedswitchedaccurateljbox":
         testsystem, system, positions, timestep, langevin_timestep = load_lj(charge=0.15*u.elementary_charge, switch_width=0.34*u.nanometers, ewaldErrorTolerance=5E-5)
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
-        groups = [(0, 1)]
+        groups = [(0, 2), (1, 1)]
         temperature = 25. * u.kelvin
 
 
