@@ -376,4 +376,4 @@ def load(sysname):
         system, positions = testsystem.system, testsystem.positions
         groups = [(0, 2), (1, 1)]
 
-    return system, positions, groups, temperature, timestep, langevin_timestep, testsystem
+    return system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps
