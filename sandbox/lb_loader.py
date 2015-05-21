@@ -7,13 +7,13 @@ import numpy as np
 import simtk.openmm as mm
 from simtk import unit as u
 
-def equilibrate(system, temperature, timestep, positions, steps=40000, npt=False, minimize=True):
+def equilibrate(system, temperature, timestep, positions, steps=40000, npt=False, minimize=True, steps_per_hmc=25):
 
     if npt:
         barostat_index = system.addForce(mm.MonteCarloBarostat(1.0 * u.atmospheres, temperature, 1))
         print(system.getDefaultPeriodicBoxVectors())
 
-    integrator = hmc_integrators.HMCIntegrator(temperature, steps_per_hmc=25, timestep=timestep)
+    integrator = hmc_integrators.HMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep)
     context = build(system, integrator, positions, temperature)
     if minimize:
         mm.LocalEnergyMinimizer.minimize(context)
@@ -152,89 +152,51 @@ def load(sysname):
     cutoff = 0.9 * u.nanometers
     temperature = 300. * u.kelvin
     langevin_timestep = 0.5 * u.femtoseconds
-    equil_steps = 25000
+    timestep = 2 * u.femtoseconds
+    equil_steps = 40000
+    groups = [(0, 1)]
 
     if sysname == "diatomicfluid":
         testsystem = testsystems.DiatomicFluid(nmolecules=1000, reduced_density=0.75, charge=0.25*u.elementary_charge, switch_width=None, constraint=True)
         system, positions = testsystem.system, testsystem.positions
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
-        groups = [(0, 1)]
         temperature = 25. * u.kelvin
-        timestep = 2 * u.femtoseconds
-
 
     if sysname == "chargedljbox":
         testsystem, system, positions, timestep, langevin_timestep = load_lj(charge=0.15*u.elementary_charge)
-        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
-        groups = [(0, 2), (1, 1)]
-        temperature = 25. * u.kelvin
 
     if sysname == "chargedswitchedljbox":
         testsystem, system, positions, timestep, langevin_timestep = load_lj(charge=0.15*u.elementary_charge, switch_width=0.34*u.nanometers)
-        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
-        groups = [(0, 2), (1, 1)]
-        temperature = 25. * u.kelvin
 
     if sysname == "chargedlongljbox":
         testsystem, system, positions, timestep, langevin_timestep = load_lj(cutoff=1.333*u.nanometers, charge=0.15*u.elementary_charge)
-        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
-        groups = [(0, 2), (1, 1)]
-        temperature = 25. * u.kelvin
 
     if sysname == "chargedswitchedlongljbox":
         testsystem, system, positions, timestep, langevin_timestep = load_lj(cutoff=1.333*u.nanometers, charge=0.15*u.elementary_charge, switch_width=0.34*u.nanometers)
-        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
-        groups = [(0, 2), (1, 1)]
-        temperature = 25. * u.kelvin
 
     if sysname == "chargedswitchedaccuratelongljbox":
         testsystem, system, positions, timestep, langevin_timestep = load_lj(cutoff=1.333*u.nanometers, charge=0.15*u.elementary_charge, switch_width=0.34*u.nanometers, ewaldErrorTolerance=5E-5)
-        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
-        groups = [(0, 2), (1, 1)]
-        temperature = 25. * u.kelvin
 
     if sysname == "chargedswitchedaccurateljbox":
         testsystem, system, positions, timestep, langevin_timestep = load_lj(charge=0.15*u.elementary_charge, switch_width=0.34*u.nanometers, ewaldErrorTolerance=5E-5)
-        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
-        groups = [(0, 2), (1, 1)]
-        temperature = 25. * u.kelvin
-
 
     if sysname == "ljbox":
         testsystem, system, positions, timestep, langevin_timestep = load_lj()
-        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
-        groups = [(0, 1)]
-        temperature = 25. * u.kelvin
 
     if sysname == "longljbox":
         testsystem, system, positions, timestep, langevin_timestep = load_lj(cutoff=1.333*u.nanometers)
-        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
-        groups = [(0, 1)]
-        temperature = 25. * u.kelvin
 
     if sysname == "shortljbox":
         testsystem, system, positions, timestep, langevin_timestep = load_lj(cutoff=0.90*u.nanometers)
-        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
-        groups = [(0, 1)]
-        temperature = 25. * u.kelvin
 
     if sysname == "shiftedljbox":
         testsystem, system, positions, timestep, langevin_timestep = load_lj(shift=True)
-        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
-        groups = [(0, 1)]
-        temperature = 25. * u.kelvin
 
     if sysname == "switchedljbox":
         testsystem, system, positions, timestep, langevin_timestep = load_lj(switch_width=0.34*u.nanometers)
-        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
-        groups = [(0, 1)]
-        temperature = 25. * u.kelvin
 
     if sysname == "switchedshortljbox":
         testsystem, system, positions, timestep, langevin_timestep = load_lj(cutoff=0.90*u.nanometers, switch_width=0.34*u.nanometers)
-        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
-        groups = [(0, 1)]
-        temperature = 25. * u.kelvin
 
     if sysname == "cluster":
         testsystem = testsystems.LennardJonesCluster(nx=8, ny=8, nz=8)
@@ -279,68 +241,38 @@ def load(sysname):
     if sysname == "shortwater":
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=0.9*u.nanometers, switch_width=None)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
-        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
-        groups = [(0, 2), (1, 1)]
-        timestep = 1.5 * u.femtoseconds
 
     if sysname == "shortswitchedwater":
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=0.9*u.nanometers, switch_width=3.0*u.angstroms)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
-        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
-        groups = [(0, 2), (1, 1)]
-        timestep = 1.5 * u.femtoseconds
-
 
     if sysname == "water":
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=1.1*u.nanometers, switch_width=None)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
-        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
-        groups = [(0, 2), (1, 1)]
-        timestep = 1.5 * u.femtoseconds
 
     if sysname == "switchedwater":
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=1.1*u.nanometers, switch_width=3.0*u.angstroms)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
-        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
-        groups = [(0, 2), (1, 1)]
-        timestep = 1.5 * u.femtoseconds
 
     if sysname == "switchedaccuratewater":
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=1.1*u.nanometers, switch_width=3.0*u.angstroms, ewaldErrorTolerance=5E-5)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
-        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
-        groups = [(0, 2), (1, 1)]
-        timestep = 1.5 * u.femtoseconds
 
     if sysname == "longswitchedwater":
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=1.5*u.nanometers, switch_width=3.0*u.angstroms)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
-        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
-        groups = [(0, 2), (1, 1)]
-        timestep = 1.5 * u.femtoseconds
-
 
     if sysname == "rfwater":
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=1.1*u.nanometers, nonbondedMethod=app.CutoffPeriodic, switch_width=None)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
-        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
-        groups = [(0, 2), (1, 1)]
-        timestep = 1.5 * u.femtoseconds
 
     if sysname == "switchedrfwater":
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=1.1*u.nanometers, nonbondedMethod=app.CutoffPeriodic, switch_width=3.0*u.angstroms)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
-        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
-        groups = [(0, 2), (1, 1)]
-        timestep = 1.5 * u.femtoseconds
 
     if sysname == "longswitchedrfwater":
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=1.5*u.nanometers, nonbondedMethod=app.CutoffPeriodic, switch_width=3.0*u.angstroms)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
-        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
-        groups = [(0, 2), (1, 1)]
-        timestep = 1.5 * u.femtoseconds
-
 
     if sysname == "density":
         system, positions = load_lb(hydrogenMass=3.0 * u.amu)
@@ -376,4 +308,20 @@ def load(sysname):
         system, positions = testsystem.system, testsystem.positions
         groups = [(0, 2), (1, 1)]
 
-    return system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps
+    # guess force groups
+
+    if "ljbox" in sysname:
+        timestep = 25 * u.femtoseconds
+        temperature = 25. * u.kelvin
+        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
+        groups = [(0, 2), (1, 1)]
+        equil_steps = 10000
+        steps_per_hmc = 15
+
+    elif "water" in sysname:
+        timestep = 1.5 * u.femtoseconds
+        groups = [(0, 2), (1, 1)]
+        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
+
+
+    return system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc

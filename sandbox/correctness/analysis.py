@@ -46,7 +46,7 @@ for (precision, integrator, sysname), x in data.groupby(("precision", "integrato
 
 data["pval"] = np.nan
 #data[["sysname", "integrator", "mu", "stderr", "Neff", "timestep"]]
-data = data.drop(["start", "friction", "Neff", "g"], axis=1)
+data = data.drop(["start", "friction", "g"], axis=1)
 
 for (precision, sysname), di in data.groupby(["precision", "sysname"]):
     y = di.set_index("integrator").ix["HMCIntegrator"].samples

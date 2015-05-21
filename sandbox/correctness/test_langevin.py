@@ -1,4 +1,3 @@
-import os
 import lb_loader
 import pandas as pd
 import simtk.openmm.app as app
@@ -13,7 +12,7 @@ sysname = "switchedaccuratewater"
 
 system, positions, groups, temperature, timestep, langevin_timestep, testsystem = lb_loader.load(sysname)
 
-positions, boxes = lb_loader.equilibrate(system, temperature, timestep, positions, minimize=True)
+positions, boxes = lb_loader.equilibrate(system, temperature, timestep, positions, equil_steps, minimize=True)
 
 collision_rate = 1.0 / u.picoseconds
 n_steps = 25

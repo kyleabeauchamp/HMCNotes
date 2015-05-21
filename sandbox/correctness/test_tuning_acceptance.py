@@ -8,16 +8,15 @@ from openmmtools import hmc_integrators, testsystems
 
 precision = "mixed"
 
-sysname = "diatomicfluid"
+sysname = "chargedswitchedaccurateljbox"
 
-system, positions, groups, temperature, timestep, langevin_timestep, testsystem = lb_loader.load(sysname)
+system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc = lb_loader.load(sysname)
+positions, boxes = lb_loader.equilibrate(system, temperature, timestep, positions, steps=equil_steps, minimize=True, steps_per_hmc=steps_per_hmc)
 
-integrator = hmc_integrators.HMCIntegrator(temperature, steps_per_hmc=25, timestep=timestep)
+integrator = hmc_integrators.HMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep)
 context = lb_loader.build(system, integrator, positions, temperature)
 context.getState(getEnergy=True).getPotentialEnergy()
-mm.LocalEnergyMinimizer.minimize(context)
-context.getState(getEnergy=True).getPotentialEnergy()
-integrator.step(300)
+integrator.step(2500)
 context.getState(getEnergy=True).getPotentialEnergy()
 integrator.acceptance_rate
 positions = context.getState(getPositions=True).getPositions()
