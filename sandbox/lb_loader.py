@@ -155,6 +155,7 @@ def load(sysname):
     timestep = 2 * u.femtoseconds
     equil_steps = 40000
     groups = [(0, 1)]
+    steps_per_hmc = 25
 
     if sysname == "diatomicfluid":
         testsystem = testsystems.DiatomicFluid(nmolecules=1000, reduced_density=0.75, charge=0.25*u.elementary_charge, switch_width=None, constraint=True)
@@ -304,7 +305,7 @@ def load(sysname):
     if sysname == "customsplitho":
         timestep = 50.0 * u.femtoseconds
         energy_expressions = ("0.75 * (x^2 + y^2 + z^2)", "0.25 * (x^2 + y^2 + z^2)")
-        testsystem = testsystems.CustomPotentialTestSystem(energy_expressions=energy_expressions)
+        testsystem = testsystems.CustomExternalForcesTestSystem(energy_expressions=energy_expressions)
         system, positions = testsystem.system, testsystem.positions
         groups = [(0, 2), (1, 1)]
 
