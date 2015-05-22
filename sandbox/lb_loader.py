@@ -303,7 +303,7 @@ def load(sysname):
         groups = [(0, 1)]
 
     if sysname == "customsplitho":
-        timestep = 50.0 * u.femtoseconds
+        timestep = 1000.0 * u.femtoseconds
         energy_expressions = ("0.75 * (x^2 + y^2 + z^2)", "0.25 * (x^2 + y^2 + z^2)")
         testsystem = testsystems.CustomExternalForcesTestSystem(energy_expressions=energy_expressions)
         system, positions = testsystem.system, testsystem.positions
