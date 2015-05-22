@@ -68,6 +68,7 @@ def load_amoeba(hydrogenMass=1.0):
 
 def converge(context, n_steps=1, Neff_cutoff=1E4, sleep_time=45, filename=None):
     integrator = context.getIntegrator()
+    itype = type(integrator).__name__
 
     data = None
 
@@ -77,7 +78,7 @@ def converge(context, n_steps=1, Neff_cutoff=1E4, sleep_time=45, filename=None):
 
     while True:
         integrator.step(n_steps)
-        if type(integrator) in ["XHMCIntegrator", "XHMCRESPAIntegrator"]:
+        if itype in ["XHMCIntegrator", "XHMCRESPAIntegrator"]:
             if integrator.getGlobalVariableByName("a") != 1.:
                 continue
 
@@ -106,7 +107,13 @@ def converge(context, n_steps=1, Neff_cutoff=1E4, sleep_time=45, filename=None):
         sigma = energies[start:].std()
         stderr = sigma * Neff ** -0.5
 
-        print("t0=%f, energy = %.4f + %.3f, N=%d, start=%d, g=%.4f, Neff=%.4f, stderr=%f" % (t0, mu, sigma, len(energies), start, g, Neff, stderr))
+        other_str = ""
+        if "HMC" in itype:
+            other_str = "acceptance_rate=%.3f" % integrator.accept
+        else:
+            other_str = ""
+
+        print("t0=%f, energy = %.4f + %.3f, N=%d, start=%d, g=%.4f, Neff=%.4f, stderr=%f other=%s" % (t0, mu, sigma, len(energies), start, g, Neff, stderr, other_str))
 
         if filename is not None:
             data.to_csv(filename)
