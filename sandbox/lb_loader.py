@@ -66,8 +66,9 @@ def load_amoeba(hydrogenMass=1.0):
     return system, pdb.positions
 
 
-def converge(context, n_steps=1, Neff_cutoff=1E4, sleep_time=45, filename=None):
-    integrator = context.getIntegrator()
+def converge(context, integrator, n_steps=1, Neff_cutoff=1E4, sleep_time=45, filename=None):
+
+    #integrator = context.getIntegrator()  # DO NOT TRY: THIS ERASES THE SUBCLASS INFORMATION IN THE CUSTOM INTEGRATOR!!!
     itype = type(integrator).__name__
 
     data = None
@@ -78,9 +79,6 @@ def converge(context, n_steps=1, Neff_cutoff=1E4, sleep_time=45, filename=None):
 
     while True:
         integrator.step(n_steps)
-        if itype in ["XHMCIntegrator", "XHMCRESPAIntegrator"]:
-            if integrator.getGlobalVariableByName("a") != 1.:
-                continue
 
         state = context.getState(getEnergy=True)
         energy = state.getPotentialEnergy() / u.kilojoules_per_mole
@@ -98,22 +96,19 @@ def converge(context, n_steps=1, Neff_cutoff=1E4, sleep_time=45, filename=None):
             continue
 
         energies = data.energy.values
-        #[start, g, Neff] = pymbar.timeseries.detectEquilibration(energies, nskip=1000)  # THIS IS TOO SLOW FOR ITERATIVE USE!
-        start = 0  # Requires some pre-equilibration
         g = pymbar.timeseries.statisticalInefficiency(energies)
         Neff = len(energies) / g
 
-        mu = energies[start:].mean()
-        sigma = energies[start:].std()
+        mu = energies.mean()
+        sigma = energies.std()
         stderr = sigma * Neff ** -0.5
 
-        other_str = ""
         if "HMC" in itype:
-            other_str = "acceptance_rate=%.3f" % integrator.accept
+            other_str = "arate=%.3f" % integrator.accept
         else:
             other_str = ""
 
-        print("t0=%f, energy = %.4f + %.3f, N=%d, start=%d, g=%.4f, Neff=%.4f, stderr=%f other=%s" % (t0, mu, sigma, len(energies), start, g, Neff, stderr, other_str))
+        print("t0=%f, energy = %.4f + %.3f, N=%d, g=%.4f, Neff=%.4f, stderr=%f other=%s" % (t0, mu, sigma, len(energies), g, Neff, stderr, other_str))
 
         if filename is not None:
             data.to_csv(filename)
@@ -121,7 +116,7 @@ def converge(context, n_steps=1, Neff_cutoff=1E4, sleep_time=45, filename=None):
         t0 = t1
 
         if Neff > Neff_cutoff:
-            return data, start, g, Neff, mu, sigma, stderr
+            return data, g, Neff, mu, sigma, stderr
 
 def build(system, integrator, positions, temperature, precision="mixed"):
 
@@ -146,12 +141,6 @@ def load_lj(cutoff=None, dispersion_correction=False, switch_width=None, shift=F
 
     timestep = 2 * u.femtoseconds
     langevin_timestep = 0.5 * u.femtoseconds
-
-
-    #positions = np.loadtxt("./sandbox/ljbox.dat")
-    #length = 2.66723326712
-    #boxes = ((length, 0, 0), (0, length, 0), (0, 0, length))
-    #system.setDefaultPeriodicBoxVectors(*boxes)
 
     return testsystem, system, positions, timestep, langevin_timestep
 
@@ -304,7 +293,7 @@ def load(sysname):
         groups = [(0, 1)]
 
     if sysname == "customho":
-        timestep = 50.0 * u.femtoseconds
+        timestep = 1000.0 * u.femtoseconds
         testsystem = testsystems.CustomExternalForcesTestSystem()
         system, positions = testsystem.system, testsystem.positions
         groups = [(0, 1)]
