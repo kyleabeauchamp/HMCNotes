@@ -83,7 +83,8 @@ def converge(context, integrator, n_steps=1, Neff_cutoff=1E4, sleep_time=45, fil
         state = context.getState(getEnergy=True)
         energy = state.getPotentialEnergy() / u.kilojoules_per_mole
 
-        current_data = dict(energy=energy)
+        elapsed = time.time() - t00
+        current_data = dict(energy=energy, elapsed=elapsed)
 
         if data is None:
             data = pd.DataFrame([current_data])
@@ -104,11 +105,11 @@ def converge(context, integrator, n_steps=1, Neff_cutoff=1E4, sleep_time=45, fil
         stderr = sigma * Neff ** -0.5
 
         if "HMC" in itype:
-            other_str = "arate=%.3f" % integrator.accept
+            other_str = "arate=%.3f" % integrator.acceptance_rate
         else:
             other_str = ""
 
-        print("t0=%f, energy = %.4f + %.3f, N=%d, g=%.4f, Neff=%.4f, stderr=%f other=%s" % (t0, mu, sigma, len(energies), g, Neff, stderr, other_str))
+        print("t0=%f, energy = %.4f + %.3f, N=%d, g=%.4f, Neff=%.4f, stderr=%f elapsed=%f other=%s" % (t0, mu, sigma, len(energies), g, Neff, stderr, elapsed, other_str))
 
         if filename is not None:
             data.to_csv(filename)
@@ -124,7 +125,8 @@ def build(system, integrator, positions, temperature, precision="mixed"):
         platform = mm.Platform.getPlatformByName('CUDA')
         properties = {'CudaPrecision': precision}
         context = mm.Context(system, integrator, platform, properties)
-    except:
+    except Exception as e:
+        print(e)
         print("Warning: no CUDA platform found, not specifying precision.")
         context = mm.Context(system, integrator)
 
@@ -314,11 +316,28 @@ def load(sysname):
         groups = [(0, 2), (1, 1)]
         equil_steps = 10000
         steps_per_hmc = 15
+        """  # Optimal
+        timestep = 42.75125 * u.femtoseconds
+        extra_chances = 5
+        steps_per_hmc = 30
+        """
+
 
     elif "water" in sysname:
         timestep = 1.5 * u.femtoseconds
         groups = [(0, 2), (1, 1)]
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
+        """
+        extra_chances= 6.0
+        steps_per_hmc = 30.0
+        timestep = 1.5773278229552214 * 1.5 * u.femtoseconds
+        """
+        """
+        extra_chances= 2.0
+        steps_per_hmc = 25.0
+        timestep = 2.4208317230875265 * 1.5 * u.femtoseconds
+        groups = [(0, 2), (1, 1)]
+        """
 
 
     return system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc
