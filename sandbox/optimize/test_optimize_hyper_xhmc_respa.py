@@ -8,7 +8,7 @@ from simtk import unit as u
 from openmmtools import hmc_integrators, testsystems
 pd.set_option('display.width', 1000)
 
-n_steps = 1000
+n_steps = 2000
 precision = "mixed"
 
 sysname = "alanineexplicit"
@@ -16,13 +16,20 @@ sysname = "alanineexplicit"
 system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc = lb_loader.load(sysname)
 positions, boxes = lb_loader.equilibrate(system, temperature, timestep, positions, steps=equil_steps, minimize=True, steps_per_hmc=steps_per_hmc)
 
-max_evals = 50
+max_evals = 15
 
 steps_per_hmc = hp.quniform("steps_per_hmc", 10, 25, 1)
 extra_chances = hp.quniform("extra_chances", 0, 6, 1)
 timestep_factor = hp.uniform("timestep_factor", 0.75, 2.5)
 respa_factor0 = hp.quniform("respa_factor0", 1, 4, 1)
 respa_factor1 = hp.quniform("respa_factor1", 1, 2, 1)
+
+steps_per_hmc = hp.quniform("steps_per_hmc", 18, 25, 1)
+extra_chances = hp.quniform("extra_chances", 0, 4, 1)
+timestep_factor = hp.uniform("timestep_factor", 1.25, 1.5)
+respa_factor0 = hp.quniform("respa_factor0", 1, 3, 1)
+respa_factor1 = hp.quniform("respa_factor1", 1, 2, 1)
+
 
 def inner_objective(args):
     steps_per_hmc, timestep_factor, extra_chances, respa_factor0, respa_factor1 = args
