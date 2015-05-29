@@ -7,6 +7,15 @@ import numpy as np
 import simtk.openmm as mm
 from simtk import unit as u
 
+def remove_cmm(system):
+    for k, force in enumerate(system.getForces()):
+        ftype = type(force).__name__
+        if ftype in ["CMMotionRemover"]:
+            system.removeForce(k)
+            print("Removed force number %d, %s" % (k, ftype))
+            break
+
+
 def equilibrate(system, temperature, timestep, positions, steps=40000, npt=False, minimize=True, steps_per_hmc=25):
 
     if npt:
@@ -313,18 +322,21 @@ def load(sysname):
         groups = [(0, 2), (1, 1)]
         timestep = 2.0 * u.femtoseconds
         hmc_integrators.guess_force_groups(system, nonbonded=1, others=0)
+        remove_cmm(system)
 
-        for k, force in enumerate(system.getForces()):
-            ftype = type(force).__name__
-            if ftype in ["CMMotionRemover"]:
-                system.removeForce(k)
-                print("Removed force number %d, %s" % (k, ftype))
-                break
         """
         timestep = 2.2991030307276072 * 2.0 * u.femtoseconds
         extra_chances = 3
         steps_per_hmc = 25
         """
+
+    if sysname == "alanineexplicit":
+        testsystem = testsystems.AlanineDipeptideExplicit(cutoff=1.1*u.nanometers, switch_width=2*u.angstrom, ewaldErrorTolerance=5E-5)
+        system, positions = testsystem.system, testsystem.positions
+        groups = [(0, 2), (1, 1), (2, 1)]
+        timestep = 2.0 * u.femtoseconds
+        hmc_integrators.guess_force_groups(system, nonbonded=1, others=0, fft=2)
+        remove_cmm(system)
 
     # guess force groups
 

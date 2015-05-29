@@ -11,21 +11,29 @@ precision = "mixed"
 sysname = "chargedswitchedaccurateljbox"
 
 system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc = lb_loader.load(sysname)
+equil_steps /= 4
 positions, boxes = lb_loader.equilibrate(system, temperature, timestep, positions, steps=equil_steps, minimize=True, steps_per_hmc=steps_per_hmc)
 
-integrator = hmc_integrators.HMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep)
+#collision_rate = 1E-3 / u.picoseconds
+
+#integrator = hmc_integrators.HMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep)
+#integrator = hmc_integrators.GHMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, collision_rate=collision_rate)
+integrator = hmc_integrators.XCHMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep)
 context = lb_loader.build(system, integrator, positions, temperature)
 context.getState(getEnergy=True).getPotentialEnergy()
-integrator.step(2500)
+integrator.step(300)
 context.getState(getEnergy=True).getPotentialEnergy()
 integrator.acceptance_rate
 positions = context.getState(getPositions=True).getPositions()
-
-
-collision_rate = 1.0 / u.picoseconds
-n_steps = 25
-
-integrator = hmc_integrators.HMCIntegrator(temperature, steps_per_hmc=25, timestep=timestep)
-context = lb_loader.build(system, integrator, positions, temperature)
-integrator.step(250)
 output = integrator.vstep(25)
+
+steps_per_hmc = 25
+integrator = hmc_integrators.XCHMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, extra_chances=1)
+context = lb_loader.build(system, integrator, positions, temperature)
+integrator.step(10000)
+print(pd.DataFrame([integrator.summary()]).to_string(formatters=[lambda x: "%.4g" % x for x in range(25)]))
+c = integrator.all_counts
+p = integrator.all_probs
+c
+p
+1 - p[0], integrator.fraction_force_wasted, integrator.effective_timestep

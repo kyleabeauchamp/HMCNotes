@@ -9,10 +9,10 @@ import numpy as np
 import glob
 pd.set_option('display.width', 1000)
 
-#system, positions, groups, temperature, timestep, langevin_timestep, testsystem = lb_loader.load("customho")
-#E0 = (3/2.) * testsystem.n_particles * testsystems.kB * temperature / u.kilojoules_per_mole
+system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc = lb_loader.load("customho")
+E0 = (3/2.) * testsystem.n_particles * testsystems.kB * temperature / u.kilojoules_per_mole
 true = collections.defaultdict(lambda: np.nan)
-#true["customho"] = E0
+true["customho"] = E0
 
 filenames = glob.glob("./data/*.csv")
 
@@ -33,7 +33,7 @@ for filename in filenames:
 data = pd.DataFrame(data)
 data = data.sort("timestep")[::-1].sort("integrator")[::-1].sort("precision").sort("sysname")
 
-for (precision, integrator, sysname), x in data.groupby(("precision", "integrator", "sysname")):
+for (precision, integrator, friction, sysname), x in data.groupby(("precision", "integrator", "friction", "sysname")):
     if integrator != "LangevinIntegrator":
         continue
     a = x.timestep.values
@@ -46,29 +46,33 @@ for (precision, integrator, sysname), x in data.groupby(("precision", "integrato
 
 data["pval"] = np.nan
 #data[["sysname", "integrator", "mu", "stderr", "Neff", "timestep"]]
-data = data.drop(["start", "friction", "g"], axis=1)
+#data = data.drop(["start", "friction", "g"], axis=1)
+data = data.drop(["start"], axis=1)
 
 for (precision, sysname), di in data.groupby(["precision", "sysname"]):
     y = di.set_index("integrator").ix["HMCIntegrator"].samples
     mu0 = di.set_index("integrator").ix["HMCIntegrator"].mu
-    for (integrator, timestep), vi in di.set_index(["integrator", "timestep"]).iterrows():
-        print(precision, sysname, integrator, timestep)
+    for (integrator, timestep, friction), vi in di.set_index(["integrator", "timestep", "friction"]).iterrows():
+        print(precision, sysname, integrator, timestep, friction)
         x = vi.samples
         mu = vi.mu
         delta = mu - mu0
         relerr = delta / mu0
         tscore, pval = scipy.stats.ttest_ind(x, y, equal_var=False)
-        cond = (data.precision == precision) & (data.sysname == sysname) & (data.integrator == integrator) & (data.timestep == timestep)
+        cond = (data.precision == precision) & (data.sysname == sysname) & (data.integrator == integrator) & (data.timestep == timestep) & (data.friction == friction)
         data.loc[cond, "tscore"] = tscore
         data.loc[cond, "pval"] = pval
-        data.loc[cond, "relerr"] = relerr
         data.loc[cond, "error"] = delta
+        data.loc[cond, "relerr"] = relerr
 
 
-data.drop("samples", axis=1)  # Printing the samples looks bad.
+print(data.drop("samples", axis=1))  # Printing the samples looks bad.
 
 
-print(data[data.sysname.isin(["ljbox", "switchedljbox", "shiftedljbox"])].drop("samples", axis=1))
-print(data[data.sysname.isin(["chargedljbox", "chargedswitchedljbox", "chargedswitchedaccurateljbox"])].drop("samples", axis=1))
+#print(data[data.sysname.isin(["ljbox", "switchedljbox", "shiftedljbox"])].drop("samples", axis=1))
+#print(data[data.sysname.isin(["chargedljbox", "chargedswitchedljbox", "chargedswitchedaccurateljbox"])].drop("samples", axis=1))
 
-print(data[data.sysname.isin(["switchedaccuratewater"])].drop("samples", axis=1))
+#print(data[data.sysname.isin(["switchedaccuratewater"])].drop("samples", axis=1))
+data["truediff"] = data.mu - E0
+#print(data[data.sysname.isin(["customsplitho"])].drop("samples", axis=1))
+print(data[data.sysname.isin(["chargedswitchedaccurateljbox"])].drop("samples", axis=1))

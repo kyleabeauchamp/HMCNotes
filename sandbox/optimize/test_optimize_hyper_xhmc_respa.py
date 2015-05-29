@@ -20,15 +20,21 @@ max_evals = 50
 
 steps_per_hmc = hp.quniform("steps_per_hmc", 10, 25, 1)
 extra_chances = hp.quniform("extra_chances", 0, 6, 1)
-timestep_factor = hp.uniform("timestep_factor", 1.0, 2.5)
+timestep_factor = hp.uniform("timestep_factor", 0.75, 2.5)
+respa_factor0 = hp.quniform("respa_factor0", 1, 4, 1)
+respa_factor1 = hp.quniform("respa_factor1", 1, 2, 1)
 
 def inner_objective(args):
-    steps_per_hmc, timestep_factor, extra_chances = args
-    print("steps=%d, factor=%f, extra_chances=%d" % (steps_per_hmc, timestep_factor, extra_chances))
+    steps_per_hmc, timestep_factor, extra_chances, respa_factor0, respa_factor1 = args
+    print("steps=%d, factor=%f, extra_chances=%d, respa_factor0=%d respa_factor1=%d" % (steps_per_hmc, timestep_factor, extra_chances, respa_factor0, respa_factor1))
     current_timestep = timestep * timestep_factor
     extra_chances = int(extra_chances)
     steps_per_hmc = int(steps_per_hmc)
-    integrator = hmc_integrators.XCHMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=current_timestep, extra_chances=extra_chances)
+    respa_factor0 = int(respa_factor0)
+    respa_factor1 = int(respa_factor1)
+    #groups = [(0, respa_factor0), (1, 1)]
+    groups = [(0, respa_factor0), (1, respa_factor1), (2, 1)]
+    integrator = hmc_integrators.XCHMCRESPAIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=current_timestep, extra_chances=extra_chances, groups=groups)
     context = lb_loader.build(system, integrator, positions, temperature)
     integrator.step(n_steps)
     _ = integrator.vstep(10)
@@ -41,9 +47,9 @@ def objective(args):
     return -1.0 * integrator.effective_ns_per_day
 
 
-space = [steps_per_hmc, timestep_factor, extra_chances]
+space = [steps_per_hmc, timestep_factor, extra_chances, respa_factor0, respa_factor1]
 best = fmin(fn=objective, space=space, algo=tpe.suggest, max_evals=max_evals)
 
-integrator = inner_objective((best["steps_per_hmc"], best["timestep_factor"], best["extra_chances"]))
+integrator = inner_objective((best["steps_per_hmc"], best["timestep_factor"], best["extra_chances"], best["respa_factor0"], best["respa_factor1"]))
 best
 print(integrator.effective_ns_per_day, integrator.effective_timestep)
