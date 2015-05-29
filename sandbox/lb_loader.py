@@ -109,7 +109,7 @@ def converge(context, integrator, n_steps=1, Neff_cutoff=1E4, sleep_time=45, fil
         else:
             other_str = ""
 
-        print("t0=%f, energy = %.4f + %.3f, N=%d, g=%.4f, Neff=%.4f, stderr=%f elapsed=%f other=%s" % (t0, mu, sigma, len(energies), g, Neff, stderr, elapsed, other_str))
+        print("t0=%f, energy = %.4f + %.3f, N=%d, g=%.4f, Neff=%.4f, stderr=%f elapsed=%f Neff/s=%f other=%s" % (t0, mu, sigma, len(energies), g, Neff, stderr, elapsed, Neff / elapsed, other_str))
 
         if filename is not None:
             data.to_csv(filename)
@@ -280,10 +280,10 @@ def load(sysname):
         timestep = 2.0 * u.femtoseconds
 
     if sysname == "dhfr":
-        testsystem = testsystems.DHFRExplicit(nonbondedCutoff=cutoff, nonbondedMethod=app.PME)
+        testsystem = testsystems.DHFRExplicit(nonbondedCutoff=1.0*u.nanometers, nonbondedMethod=app.PME, switch_width=2.0*u.angstroms, ewaldErrorTolerance=5E-5)
         system, positions = testsystem.system, testsystem.positions
-        hmc_integrators.guess_force_groups(system, nonbonded=1, fft=1, others=0)
-        groups = [(0, 4), (1, 1)]
+        hmc_integrators.guess_force_groups(system, nonbonded=1, fft=2, others=0)
+        groups = [(0, 4), (1, 1), (2, 1)]
         timestep = 1.0 * u.femtoseconds
 
     if sysname == "ho":
@@ -306,6 +306,25 @@ def load(sysname):
         testsystem = testsystems.CustomExternalForcesTestSystem(energy_expressions=energy_expressions)
         system, positions = testsystem.system, testsystem.positions
         groups = [(0, 2), (1, 1)]
+
+    if sysname == "alanine":
+        testsystem = testsystems.AlanineDipeptideImplicit()
+        system, positions = testsystem.system, testsystem.positions
+        groups = [(0, 2), (1, 1)]
+        timestep = 2.0 * u.femtoseconds
+        hmc_integrators.guess_force_groups(system, nonbonded=1, others=0)
+
+        for k, force in enumerate(system.getForces()):
+            ftype = type(force).__name__
+            if ftype in ["CMMotionRemover"]:
+                system.removeForce(k)
+                print("Removed force number %d, %s" % (k, ftype))
+                break
+        """
+        timestep = 2.2991030307276072 * 2.0 * u.femtoseconds
+        extra_chances = 3
+        steps_per_hmc = 25
+        """
 
     # guess force groups
 
