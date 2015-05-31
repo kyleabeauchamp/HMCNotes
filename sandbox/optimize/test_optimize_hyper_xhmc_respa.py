@@ -14,7 +14,7 @@ precision = "mixed"
 sysname = "alanineexplicit"
 
 system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc = lb_loader.load(sysname)
-positions, boxes = lb_loader.equilibrate(system, temperature, timestep, positions, steps=equil_steps, minimize=True, steps_per_hmc=steps_per_hmc)
+positions, boxes = lb_loader.equilibrate(testsystem, temperature, timestep, steps=equil_steps, minimize=True, steps_per_hmc=steps_per_hmc)
 
 max_evals = 15
 
@@ -42,7 +42,7 @@ def inner_objective(args):
     #groups = [(0, respa_factor0), (1, 1)]
     groups = [(0, respa_factor0), (1, respa_factor1), (2, 1)]
     integrator = hmc_integrators.XCHMCRESPAIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=current_timestep, extra_chances=extra_chances, groups=groups)
-    context = lb_loader.build(system, integrator, positions, temperature)
+    simulation = lb_loader.build(testsystem, integrator, temperature)
     integrator.step(n_steps)
     _ = integrator.vstep(10)
     return integrator

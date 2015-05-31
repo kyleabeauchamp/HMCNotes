@@ -8,15 +8,12 @@ from openmmtools import hmc_integrators, testsystems
 
 precision = "mixed"
 
-sysname = "switchedaccuratewater"
+sysname = "chargedswitchedaccurateljbox"
 
 system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc = lb_loader.load(sysname)
-positions, boxes = lb_loader.equilibrate(system, temperature, timestep, positions, steps=equil_steps, minimize=True)
+positions, boxes = lb_loader.equilibrate(testsystem, temperature, timestep, steps=equil_steps, minimize=True)
 
-
-#collision_rate = 1E-1 / u.picoseconds
 collision_rate = 1E0 / u.picoseconds
-#collision_rate = 1E1 / u.picoseconds
 n_steps = 1  # Number inside integrator.step()
 Neff_cutoff = 1E5
 

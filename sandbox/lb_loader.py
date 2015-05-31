@@ -16,19 +16,22 @@ def remove_cmm(system):
             break
 
 
-def equilibrate(system, temperature, timestep, positions, steps=40000, npt=False, minimize=True, steps_per_hmc=25):
+def equilibrate(testsystem, temperature, timestep, steps=40000, npt=False, minimize=True, steps_per_hmc=25):
+    system, topology, positions = testsystem.system, testsystem.topology, testsystem.positions
 
     if npt:
         barostat_index = system.addForce(mm.MonteCarloBarostat(1.0 * u.atmospheres, temperature, 1))
         print(system.getDefaultPeriodicBoxVectors())
 
     integrator = hmc_integrators.HMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep)
-    context = build(system, integrator, positions, temperature)
+    simulation = build(testsystem, integrator, temperature)
+    
     if minimize:
-        mm.LocalEnergyMinimizer.minimize(context)
+        simulation.minimizeEnergy()
+    
     integrator.step(steps)
 
-    state = context.getState(getPositions=True, getParameters=True)
+    state = simulation.context.getState(getPositions=True, getParameters=True)
     positions = state.getPositions()
     boxes = state.getPeriodicBoxVectors()
 
@@ -38,6 +41,8 @@ def equilibrate(system, temperature, timestep, positions, steps=40000, npt=False
         system.removeForce(barostat_index)
         system.setDefaultPeriodicBoxVectors(*boxes)
         print(system.getDefaultPeriodicBoxVectors())
+    
+    testsystem.positions = positions
     return positions, boxes
 
 
@@ -75,9 +80,9 @@ def load_amoeba(hydrogenMass=1.0):
     return system, pdb.positions
 
 
-def converge(context, integrator, n_steps=1, Neff_cutoff=1E4, sleep_time=45, filename=None):
+def converge(simulation, n_steps=1, Neff_cutoff=1E4, sleep_time=45, filename=None):
 
-    #integrator = context.getIntegrator()  # DO NOT TRY: THIS ERASES THE SUBCLASS INFORMATION IN THE CUSTOM INTEGRATOR!!!
+    integrator = simulation.integrator
     itype = type(integrator).__name__
 
     data = None
@@ -89,7 +94,7 @@ def converge(context, integrator, n_steps=1, Neff_cutoff=1E4, sleep_time=45, fil
     while True:
         integrator.step(n_steps)
 
-        state = context.getState(getEnergy=True)
+        state = simulation.context.getState(getEnergy=True)
         energy = state.getPotentialEnergy() / u.kilojoules_per_mole
 
         elapsed = time.time() - t00
@@ -128,20 +133,25 @@ def converge(context, integrator, n_steps=1, Neff_cutoff=1E4, sleep_time=45, fil
         if Neff > Neff_cutoff:
             return data, g, Neff, mu, sigma, stderr
 
-def build(system, integrator, positions, temperature, precision="mixed"):
+def build(testsystem, integrator, temperature, precision="mixed"):
+    system, topology, positions = testsystem.system, testsystem.topology, testsystem.positions
 
     try:
         platform = mm.Platform.getPlatformByName('CUDA')
         properties = {'CudaPrecision': precision}
-        context = mm.Context(system, integrator, platform, properties)
+        simulation = app.Simulation(topology, system, integrator, platform=platform, platformProperties=properties)
+        #context = mm.Context(system, integrator, platform, properties)
     except Exception as e:
         print(e)
         print("Warning: no CUDA platform found, not specifying precision.")
-        context = mm.Context(system, integrator)
-
+        #context = mm.Context(system, integrator)
+        simulation = app.Simulation(topology, system, integrator)
+    
+    context = simulation.context
     context.setPositions(positions)
     context.setVelocitiesToTemperature(temperature)
-    return context
+    
+    return simulation
 
 def load_lj(cutoff=None, dispersion_correction=False, switch_width=None, shift=False, charge=None, ewaldErrorTolerance=None):
     reduced_density = 0.90
@@ -334,15 +344,17 @@ def load(sysname):
         testsystem = testsystems.AlanineDipeptideExplicit(cutoff=1.1*u.nanometers, switch_width=2*u.angstrom, ewaldErrorTolerance=5E-5)
         system, positions = testsystem.system, testsystem.positions
         groups = [(0, 2), (1, 1), (2, 1)]
-        timestep = 2.0 * u.femtoseconds
+        timestep = 1.0 * u.femtoseconds
         hmc_integrators.guess_force_groups(system, nonbonded=1, others=0, fft=2)
         remove_cmm(system)
+        equil_steps = 30000
 
     # guess force groups
 
     if "ljbox" in sysname:
         timestep = 25 * u.femtoseconds
         temperature = 25. * u.kelvin
+        system, positions = testsystem.system, testsystem.positions
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
         groups = [(0, 2), (1, 1)]
         equil_steps = 10000
