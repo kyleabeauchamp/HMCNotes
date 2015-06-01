@@ -8,18 +8,40 @@ from openmmtools import hmc_integrators, testsystems
 
 precision = "mixed"
 
-sysname = "switchedaccuratewater"
+#sysname = "switchedaccuratewater"
+sysname = "alanine"
 
 system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc = lb_loader.load(sysname)
 positions, boxes = lb_loader.equilibrate(testsystem, temperature, timestep, steps=equil_steps, minimize=True)
 
-
-nsteps = 1000000
+"""
+#nsteps = 20000000
+nsteps = 10000000
 output_frequency = 250
-collision_rate = 0.3 / u.picoseconds
+collision_rate = 100. / u.picoseconds
 timestep = 2.0 * u.femtoseconds
 integrator = mm.LangevinIntegrator(temperature, collision_rate, timestep)
+"""
 
+
+nsteps = 500000
+collision_rate = 1. / u.picoseconds  # Not used but necessary for filename convention.
+output_frequency = 5
+timestep = 4.029 * u.femtoseconds
+extra_chances = 6
+steps_per_hmc = 32
+integrator = hmc_integrators.XCHMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, extra_chances=extra_chances)
+
+
+"""
+nsteps = 500000
+collision_rate = 100. / u.picoseconds
+output_frequency = 5
+timestep = 3.988 * u.femtoseconds
+extra_chances = 4
+steps_per_hmc = 33
+integrator = hmc_integrators.XCGHMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, extra_chances=extra_chances, collision_rate=collision_rate)
+"""
 
 """
 nsteps = 100000
@@ -30,16 +52,18 @@ steps_per_hmc = 23
 groups = [(0, 2), (1, 2), (2, 1)]
 """
 
+
+"""
 nsteps = 100000
 output_frequency = 11
 extra_chances = 2
 steps_per_hmc = 25
-timestep = 2.4208317230875265 * 1.5 * u.femtoseconds
+timestep = 3.63125 * u.femtoseconds
 groups = [(0, 2), (1, 1)]
-
-
-integrator = hmc_integrators.XCHMCRESPAIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, groups=groups, extra_chances=extra_chances)
-
+#integrator = hmc_integrators.XCHMCRESPAIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, groups=groups, extra_chances=extra_chances)
+collision_rate = 100.0 / u.picoseconds
+integrator = hmc_integrators.XCGHMCRESPAIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, groups=groups, extra_chances=extra_chances, collision_rate=collision_rate)
+"""
 
 
 itype = type(integrator).__name__

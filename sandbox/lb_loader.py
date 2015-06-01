@@ -335,9 +335,16 @@ def load(sysname):
         remove_cmm(system)
 
         """
-        timestep = 2.2991030307276072 * 2.0 * u.femtoseconds
+        timestep = 4.5982 * u.femtoseconds
         extra_chances = 3
         steps_per_hmc = 25
+
+        collision_rate = 100. / u.picoseconds
+        output_frequency = 5
+        timestep = 3.988 * u.femtoseconds
+        extra_chances = 4
+        steps_per_hmc = 33
+                
         """
 
     if sysname == "alanineexplicit":
@@ -370,6 +377,7 @@ def load(sysname):
         timestep = 1.5 * u.femtoseconds
         groups = [(0, 2), (1, 1)]
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
+        equil_steps = 10000
         """
         extra_chances= 6.0
         steps_per_hmc = 30.0
