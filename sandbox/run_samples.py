@@ -9,7 +9,8 @@ from openmmtools import hmc_integrators, testsystems
 precision = "mixed"
 
 #sysname = "switchedaccuratewater"
-sysname = "alanine"
+#sysname = "alanineexplicit"
+sysname = "chargedswitchedaccurateljbox"
 
 system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc = lb_loader.load(sysname)
 positions, boxes = lb_loader.equilibrate(testsystem, temperature, timestep, steps=equil_steps, minimize=True)
@@ -18,19 +19,20 @@ positions, boxes = lb_loader.equilibrate(testsystem, temperature, timestep, step
 #nsteps = 20000000
 nsteps = 10000000
 output_frequency = 250
-collision_rate = 100. / u.picoseconds
+collision_rate = 0.1 / u.picoseconds
 timestep = 2.0 * u.femtoseconds
 integrator = mm.LangevinIntegrator(temperature, collision_rate, timestep)
 """
 
-
+"""
 nsteps = 500000
 collision_rate = 1. / u.picoseconds  # Not used but necessary for filename convention.
-output_frequency = 5
-timestep = 4.029 * u.femtoseconds
-extra_chances = 6
-steps_per_hmc = 32
+output_frequency = 1
+timestep = 2.883 * u.femtoseconds
+extra_chances = 4
+steps_per_hmc = 505
 integrator = hmc_integrators.XCHMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, extra_chances=extra_chances)
+"""
 
 
 """
@@ -55,15 +57,23 @@ groups = [(0, 2), (1, 2), (2, 1)]
 
 """
 nsteps = 100000
-output_frequency = 11
-extra_chances = 2
-steps_per_hmc = 25
-timestep = 3.63125 * u.femtoseconds
-groups = [(0, 2), (1, 1)]
-#integrator = hmc_integrators.XCHMCRESPAIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, groups=groups, extra_chances=extra_chances)
-collision_rate = 100.0 / u.picoseconds
-integrator = hmc_integrators.XCGHMCRESPAIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, groups=groups, extra_chances=extra_chances, collision_rate=collision_rate)
+output_frequency = 1
+extra_chances = 3
+steps_per_hmc = 613
+timestep = 2.449 * u.femtoseconds
+groups = [(0, 2), (1, 2), (2, 1)]
+integrator = hmc_integrators.XCHMCRESPAIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, groups=groups, extra_chances=extra_chances)
+collision_rate = 1.0 / u.picoseconds
 """
+
+
+nsteps = 500000
+collision_rate = 1. / u.picoseconds  # Not used but necessary for filename convention.
+output_frequency = 10
+timestep = 10.0 * u.femtoseconds
+extra_chances = 4
+steps_per_hmc = 25
+integrator = hmc_integrators.UnrolledXCHMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, extra_chances=extra_chances)
 
 
 itype = type(integrator).__name__

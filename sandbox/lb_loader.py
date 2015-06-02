@@ -333,12 +333,14 @@ def load(sysname):
         timestep = 2.0 * u.femtoseconds
         hmc_integrators.guess_force_groups(system, nonbonded=1, others=0)
         remove_cmm(system)
+        equil_steps = 10000
 
         """
         timestep = 4.5982 * u.femtoseconds
         extra_chances = 3
         steps_per_hmc = 25
 
+        # Below is less good but uses XCGHMC
         collision_rate = 100. / u.picoseconds
         output_frequency = 5
         timestep = 3.988 * u.femtoseconds
@@ -355,6 +357,10 @@ def load(sysname):
         hmc_integrators.guess_force_groups(system, nonbonded=1, others=0, fft=2)
         remove_cmm(system)
         equil_steps = 30000
+        """
+        
+        
+        """
 
     # guess force groups
 

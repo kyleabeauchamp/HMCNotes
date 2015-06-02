@@ -11,21 +11,22 @@ precision = "mixed"
 sysname = "chargedswitchedaccurateljbox"
 
 system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc = lb_loader.load(sysname)
-equil_steps /= 4
-positions, boxes = lb_loader.equilibrate(system, temperature, timestep, positions, steps=equil_steps, minimize=True, steps_per_hmc=steps_per_hmc)
+equil_steps = equil_steps / 10
+positions, boxes = lb_loader.equilibrate(testsystem, temperature, timestep, steps=equil_steps, minimize=True, steps_per_hmc=steps_per_hmc)
+
 
 #collision_rate = 1E-3 / u.picoseconds
 
 #integrator = hmc_integrators.HMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep)
 #integrator = hmc_integrators.GHMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, collision_rate=collision_rate)
-integrator = hmc_integrators.XCHMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep)
-context = lb_loader.build(system, integrator, positions, temperature)
-context.getState(getEnergy=True).getPotentialEnergy()
+#integrator = hmc_integrators.XCHMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep)
+integrator = hmc_integrators.UnrolledXCHMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep)
+
+
+simulation = lb_loader.build(testsystem, integrator, temperature, precision=precision)
+
 integrator.step(300)
-context.getState(getEnergy=True).getPotentialEnergy()
 integrator.acceptance_rate
-positions = context.getState(getPositions=True).getPositions()
-output = integrator.vstep(25)
 
 steps_per_hmc = 25
 integrator = hmc_integrators.XCHMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, extra_chances=1)

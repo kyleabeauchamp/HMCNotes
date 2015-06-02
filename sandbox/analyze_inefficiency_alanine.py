@@ -13,11 +13,17 @@ lag_time = 25
 #filename1 = "./data/mixed_alanineexplicit_XCHMCRESPAIntegrator_4.000_0.%s"
 
 #filename0 = "./data/mixed_alanine_LangevinIntegrator_2.000_0.%s"
-filename0 = "./data/mixed_alanine_XCHMCIntegrator_4.598_1.%s"
-filename1 = "./data/mixed_alanine_XCHMCIntegrator_4.029_1.%s"
+#filename0 = "./data/mixed_alanine_XCHMCIntegrator_4.598_1.%s"
+#filename1 = "./data/mixed_alanine_XCHMCIntegrator_4.029_1.%s"
 #filename1 = "./data/mixed_alanine_XCGHMCIntegrator_3.988_100.%s"
 #filename1 = "./data/mixed_alanine_LangevinIntegrator_2.000_100.%s"
 #filename1 = "./data/mixed_alanine_XCHMCIntegrator_4.000_1.%s"
+
+filename0 = "./data/mixed_alanineexplicit_LangevinIntegrator_2.000_0.%s"
+#filename1 = "./data/mixed_alanineexplicit_XCHMCIntegrator_2.883_1.%s"
+filename1 = "./data/mixed_alanineexplicit_XCHMCRESPAIntegrator_2.449_1.%s"
+
+top = md.load(filename0 % "pdb")
 
 x0 = pd.read_csv(filename0 % "csv")
 x1 = pd.read_csv(filename1 % "csv")
@@ -52,8 +58,8 @@ print(e0.mean(), e1.mean(), e0.std() * n0 ** -0.5, e1.std() * n1 ** -0.5)
 
 #####
 
-trajectories0 = [md.load(filename0 % "dcd", top=(filename0 % "pdb"))]
-trajectories1 = [md.load(filename1 % "dcd", top=(filename0 % "pdb"))]
+trajectories0 = [md.load(filename0 % "dcd", top=top)]
+trajectories1 = [md.load(filename1 % "dcd", top=top)]
 
 X0 = msmbuilder.featurizer.DihedralFeaturizer().fit_transform(trajectories0)
 X1 = msmbuilder.featurizer.DihedralFeaturizer().fit_transform(trajectories1)
