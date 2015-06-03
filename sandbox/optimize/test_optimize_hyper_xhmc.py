@@ -12,7 +12,7 @@ n_steps = 200
 precision = "mixed"
 collision_rate = 1. / u.picoseconds
 
-sysname = "alanineexplicit"
+sysname = "alanine"
 
 system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc = lb_loader.load(sysname)
 positions, boxes = lb_loader.equilibrate(testsystem, temperature, timestep, steps=equil_steps, minimize=True, steps_per_hmc=steps_per_hmc)
@@ -21,7 +21,7 @@ max_evals = 10
 
 steps_per_hmc = hp.quniform("steps_per_hmc", 505, 515, 1)
 extra_chances = hp.quniform("extra_chances", 0, 4, 1)
-timestep = hp.uniform("timestep", 2.5, 3.0)
+timestep = hp.uniform("timestep", 2.0, 4.25)
 
 
 def inner_objective(args):
@@ -32,7 +32,7 @@ def inner_objective(args):
     steps_per_hmc = int(steps_per_hmc)
     integrator = hmc_integrators.XCHMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=current_timestep, extra_chances=extra_chances)
     #integrator = hmc_integrators.XCGHMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=current_timestep, extra_chances=extra_chances, collision_rate=collision_rate)
-    simulation = lb_loader.build(testsystem, integrator, temperature)
+    simulation = lb_loader.build(testsystem, integrator, temperature, precision=precision)
     simulation.integrator.step(n_steps)
     return integrator
 

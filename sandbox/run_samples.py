@@ -10,19 +10,20 @@ precision = "mixed"
 
 #sysname = "switchedaccuratewater"
 #sysname = "alanineexplicit"
-sysname = "chargedswitchedaccurateljbox"
+#sysname = "chargedswitchedaccurateljbox"
+#sysname = "alanineexplicit"
+sysname = "switchedaccuratenptwater"
 
 system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc = lb_loader.load(sysname)
 positions, boxes = lb_loader.equilibrate(testsystem, temperature, timestep, steps=equil_steps, minimize=True)
 
-"""
-#nsteps = 20000000
-nsteps = 10000000
+
+system.getForce(3).setFrequency(25)
+nsteps = 20000000
 output_frequency = 250
 collision_rate = 0.1 / u.picoseconds
 timestep = 2.0 * u.femtoseconds
 integrator = mm.LangevinIntegrator(temperature, collision_rate, timestep)
-"""
 
 """
 nsteps = 500000
@@ -67,13 +68,27 @@ collision_rate = 1.0 / u.picoseconds
 """
 
 
+"""
 nsteps = 500000
 collision_rate = 1. / u.picoseconds  # Not used but necessary for filename convention.
-output_frequency = 10
-timestep = 10.0 * u.femtoseconds
-extra_chances = 4
-steps_per_hmc = 25
+output_frequency = 1
+timestep = 3.99 * u.femtoseconds
+extra_chances = 8
+steps_per_hmc = 617
 integrator = hmc_integrators.UnrolledXCHMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, extra_chances=extra_chances)
+"""
+
+
+system.getForce(3).setFrequency(1)
+nsteps = 500000
+output_frequency = 1
+collision_rate = 1. / u.picoseconds  # Not used but necessary for filename convention.
+timestep = 5.65 * u.femtoseconds
+steps_per_hmc = 250
+extra_chances = 6
+groups = [(0, 2), (1, 1)]
+integrator = hmc_integrators.UnrolledXCHMCRESPAIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, extra_chances=extra_chances, groups=groups)
+
 
 
 itype = type(integrator).__name__

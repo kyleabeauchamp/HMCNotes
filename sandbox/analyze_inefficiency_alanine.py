@@ -21,7 +21,7 @@ lag_time = 25
 
 filename0 = "./data/mixed_alanineexplicit_LangevinIntegrator_2.000_0.%s"
 #filename1 = "./data/mixed_alanineexplicit_XCHMCIntegrator_2.883_1.%s"
-filename1 = "./data/mixed_alanineexplicit_XCHMCRESPAIntegrator_2.449_1.%s"
+filename1 = "./data/mixed_alanineexplicit_UnrolledXCHMCIntegrator_3.990_1.%s"
 
 top = md.load(filename0 % "pdb")
 

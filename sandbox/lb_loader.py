@@ -39,8 +39,9 @@ def equilibrate(testsystem, temperature, timestep, steps=40000, npt=False, minim
 
     if npt:
         system.removeForce(barostat_index)
-        system.setDefaultPeriodicBoxVectors(*boxes)
-        print(system.getDefaultPeriodicBoxVectors())
+
+    system.setDefaultPeriodicBoxVectors(*boxes)  # Doesn't hurt to reset boxes
+    print(system.getDefaultPeriodicBoxVectors())
     
     testsystem.positions = positions
     return positions, boxes
@@ -276,6 +277,11 @@ def load(sysname):
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=1.1*u.nanometers, switch_width=3.0*u.angstroms, ewaldErrorTolerance=5E-5)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
 
+    if sysname == "switchedaccuratenptwater":
+        testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=1.1*u.nanometers, switch_width=3.0*u.angstroms, ewaldErrorTolerance=5E-5)  # Around 1060 molecules of water
+        system, positions = testsystem.system, testsystem.positions
+        system.addForce(mm.MonteCarloBarostat(1.0 * u.atmospheres, temperature, 1))
+
     if sysname == "longswitchedwater":
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=1.5*u.nanometers, switch_width=3.0*u.angstroms)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
@@ -332,7 +338,7 @@ def load(sysname):
         groups = [(0, 2), (1, 1)]
         timestep = 2.0 * u.femtoseconds
         hmc_integrators.guess_force_groups(system, nonbonded=1, others=0)
-        remove_cmm(system)
+        #remove_cmm(system)  # Unrolled shouldn't need this
         equil_steps = 10000
 
         """
@@ -346,20 +352,28 @@ def load(sysname):
         timestep = 3.988 * u.femtoseconds
         extra_chances = 4
         steps_per_hmc = 33
-                
+
+        # Unrolled XCHMC
+        timestep = 3.75 * u.femtoseconds
+        extra_chances = 4
+        steps_per_hmc = 608
         """
 
     if sysname == "alanineexplicit":
         testsystem = testsystems.AlanineDipeptideExplicit(cutoff=1.1*u.nanometers, switch_width=2*u.angstrom, ewaldErrorTolerance=5E-5)
         system, positions = testsystem.system, testsystem.positions
-        groups = [(0, 2), (1, 1), (2, 1)]
+        #groups = [(0, 2), (1, 1), (2, 1)]
+        groups = [(0, 2), (1, 1)]
         timestep = 1.0 * u.femtoseconds
-        hmc_integrators.guess_force_groups(system, nonbonded=1, others=0, fft=2)
-        remove_cmm(system)
-        equil_steps = 30000
+        #hmc_integrators.guess_force_groups(system, nonbonded=1, others=0, fft=2)
+        hmc_integrators.guess_force_groups(system, nonbonded=0, others=0, fft=1)
+        #remove_cmm(system)  # Unrolled doesn't need this
+        equil_steps = 10000
         """
-        
-        
+        Unrolled
+        timestep = 3.99 * u.femtoseconds
+        extra_chances = 8
+        steps_per_hmc = 617
         """
 
     # guess force groups

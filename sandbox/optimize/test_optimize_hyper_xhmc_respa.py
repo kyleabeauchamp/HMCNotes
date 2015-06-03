@@ -36,7 +36,7 @@ def inner_objective(args):
     #groups = [(0, respa_factor0), (1, 1)]
     groups = [(0, respa_factor0), (1, respa_factor1), (2, 1)]
     integrator = hmc_integrators.XCHMCRESPAIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=current_timestep, extra_chances=extra_chances, groups=groups)
-    simulation = lb_loader.build(testsystem, integrator, temperature)
+    simulation = lb_loader.build(testsystem, integrator, temperature, precision=precision)
     integrator.step(n_steps)
     return integrator
 
