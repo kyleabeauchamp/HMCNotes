@@ -16,45 +16,40 @@ def remove_cmm(system):
             break
 
 
-def equilibrate(testsystem, temperature, timestep, steps=40000, npt=False, minimize=True, steps_per_hmc=25):
+def equilibrate(testsystem, temperature, timestep, steps=40000, npt=False, minimize=True, steps_per_hmc=25, use_hmc=True):
     system, topology, positions = testsystem.system, testsystem.topology, testsystem.positions
 
     if npt:
         barostat_index = system.addForce(mm.MonteCarloBarostat(1.0 * u.atmospheres, temperature, 1))
         print(system.getDefaultPeriodicBoxVectors())
 
-    integrator = hmc_integrators.HMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep)
+    if use_hmc:
+        integrator = hmc_integrators.GHMCIntegrator(temperature=temperature, steps_per_hmc=steps_per_hmc, timestep=timestep)
+    else:
+        integrator = mm.LangevinIntegrator(temperature, 2.0 / u.picoseconds, timestep)
+
     simulation = build(testsystem, integrator, temperature)
-    
+
     if minimize:
         simulation.minimizeEnergy()
-    
+
     integrator.step(steps)
 
     state = simulation.context.getState(getPositions=True, getParameters=True)
     positions = state.getPositions()
     boxes = state.getPeriodicBoxVectors()
 
-    print(integrator.acceptance_rate)
+    if use_hmc:
+        print(integrator.acceptance_rate)
 
     if npt:
         system.removeForce(barostat_index)
 
     system.setDefaultPeriodicBoxVectors(*boxes)  # Doesn't hurt to reset boxes
     print(system.getDefaultPeriodicBoxVectors())
-    
+
     testsystem.positions = positions
     return positions, boxes
-
-
-def pre_equil(system, positions, temperature):
-    integrator = mm.LangevinIntegrator(temperature, 1.0 / u.picoseconds, 0.5 * u.femtoseconds)
-    context = mm.Context(system, integrator)
-    context.setPositions(positions)
-    context.setVelocitiesToTemperature(temperature)
-    integrator.step(5000)
-    positions = context.getState(getPositions=True).getPositions()
-    return positions
 
 
 def load_lb(cutoff=1.1 * u.nanometers, constraints=app.HBonds, hydrogenMass=1.0 * u.amu):
@@ -147,11 +142,11 @@ def build(testsystem, integrator, temperature, precision="mixed"):
         print("Warning: no CUDA platform found, not specifying precision.")
         #context = mm.Context(system, integrator)
         simulation = app.Simulation(topology, system, integrator)
-    
+
     context = simulation.context
     context.setPositions(positions)
     context.setVelocitiesToTemperature(temperature)
-    
+
     return simulation
 
 def load_lj(cutoff=None, dispersion_correction=False, switch_width=None, shift=False, charge=None, ewaldErrorTolerance=None):
@@ -305,11 +300,12 @@ def load(sysname):
         timestep = 2.0 * u.femtoseconds
 
     if sysname == "dhfr":
-        testsystem = testsystems.DHFRExplicit(nonbondedCutoff=1.0*u.nanometers, nonbondedMethod=app.PME, switch_width=2.0*u.angstroms, ewaldErrorTolerance=5E-5)
+        testsystem = testsystems.DHFRExplicit(nonbondedCutoff=1.1*u.nanometers, nonbondedMethod=app.PME, switch_width=2.0*u.angstroms, ewaldErrorTolerance=5E-5)
         system, positions = testsystem.system, testsystem.positions
         hmc_integrators.guess_force_groups(system, nonbonded=1, fft=2, others=0)
-        groups = [(0, 4), (1, 1), (2, 1)]
-        timestep = 1.0 * u.femtoseconds
+        groups = [(0, 4), (1, 2), (2, 1)]
+        timestep = 0.75 * u.femtoseconds
+        equil_steps = 10000
 
     if sysname == "ho":
         K = 90.0 * u.kilocalories_per_mole / u.angstroms**2
@@ -368,12 +364,21 @@ def load(sysname):
         #hmc_integrators.guess_force_groups(system, nonbonded=1, others=0, fft=2)
         hmc_integrators.guess_force_groups(system, nonbonded=0, others=0, fft=1)
         #remove_cmm(system)  # Unrolled doesn't need this
-        equil_steps = 10000
+        equil_steps = 4000
         """
         Unrolled
         timestep = 3.99 * u.femtoseconds
         extra_chances = 8
         steps_per_hmc = 617
+
+        hmc_integrators.guess_force_groups(system, nonbonded=1, others=0, fft=2)
+        timestep = 4.75 * u.femtoseconds
+        steps_per_hmc = 350
+        extra_chances = 6
+        groups = [(0, 4), (1, 2), (2, 1)]
+        integrator = hmc_integrators.XCGHMCRESPAIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, extra_chances=extra_chances, groups=groups)
+
+
         """
 
     # guess force groups
@@ -399,6 +404,14 @@ def load(sysname):
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
         equil_steps = 10000
         """
+
+        timestep = 5.65 * u.femtoseconds
+        steps_per_hmc = 250
+        extra_chances = 6
+        groups = [(0, 2), (1, 1)]
+        integrator = hmc_integrators.UnrolledXCHMCRESPAIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, extra_chances=extra_chances, groups=groups)
+
+
         extra_chances= 6.0
         steps_per_hmc = 30.0
         timestep = 1.5773278229552214 * 1.5 * u.femtoseconds
