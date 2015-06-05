@@ -16,23 +16,20 @@ positions, boxes = lb_loader.equilibrate(testsystem, temperature, timestep, step
 
 
 del simulation, integrator
-timestep = 2.5 * u.femtoseconds
+timestep = 3.0 * u.femtoseconds
 
-total_steps = 3000
-extra_chances = 3
-steps_per_hmc = 170
+total_steps = 5000
+extra_chances = 7
+steps_per_hmc = 200
 
 #groups = [(0, 1), (1, 2), (2, 4)]
 #hmc_integrators.guess_force_groups(system, nonbonded=1, others=2, fft=0)
 
-groups = [(0, 1), (1, 2)]
+groups = [(0, 1), (1, 3)]
 hmc_integrators.guess_force_groups(system, nonbonded=0, others=1, fft=0)
 
 #groups = [(0, 1)]
 #hmc_integrators.guess_force_groups(system, nonbonded=0, others=0, fft=0)
-
-#steps = total_steps
-#integrator = mm.MTSIntegrator(timestep, groups)
 
 steps = total_steps / steps_per_hmc
 #integrator = hmc_integrators.XCGHMCIntegrator(temperature=temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, extra_chances=extra_chances)
@@ -42,11 +39,7 @@ integrator = hmc_integrators.XCGHMCRESPAIntegrator(temperature=temperature, step
 simulation = lb_loader.build(testsystem, integrator, temperature, precision=precision)
 
 integrator.reset_time()
-
-t0 = time.time()
 integrator.step(steps)
-dt = time.time() - t0
-ns_per_day = (timestep / u.nanoseconds) * total_steps / dt * 60 * 60 * 24
 
 c = integrator.all_counts
 p = integrator.all_probs
@@ -54,4 +47,3 @@ c
 p
 integrator.effective_timestep, integrator.effective_ns_per_day
 integrator.ns_per_day
-dt, ns_per_day

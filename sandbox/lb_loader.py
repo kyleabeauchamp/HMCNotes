@@ -170,12 +170,6 @@ def load(sysname):
     groups = [(0, 1)]
     steps_per_hmc = 25
 
-    if sysname == "diatomicfluid":
-        testsystem = testsystems.DiatomicFluid(nmolecules=1000, reduced_density=0.75, charge=0.25*u.elementary_charge, switch_width=None, constraint=True)
-        system, positions = testsystem.system, testsystem.positions
-        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=0)
-        temperature = 25. * u.kelvin
-
     if sysname == "chargedljbox":
         testsystem, system, positions, timestep, langevin_timestep = load_lj(charge=0.15*u.elementary_charge)
 
