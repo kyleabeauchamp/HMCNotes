@@ -7,6 +7,12 @@ import numpy as np
 import simtk.openmm as mm
 from simtk import unit as u
 
+def fixunits(collision_rate):
+    if collision_rate is None:
+        return -1
+    else:
+        return collision_rate * u.picoseconds
+
 def remove_cmm(system):
     for k, force in enumerate(system.getForces()):
         ftype = type(force).__name__
@@ -16,7 +22,7 @@ def remove_cmm(system):
             break
 
 
-def equilibrate(testsystem, temperature, timestep, steps=40000, npt=False, minimize=True, steps_per_hmc=25, use_hmc=True):
+def equilibrate(testsystem, temperature, timestep, steps=40000, npt=False, minimize=True, steps_per_hmc=25, use_hmc=False):
     system, topology, positions = testsystem.system, testsystem.topology, testsystem.positions
 
     if npt:
@@ -76,37 +82,14 @@ def load_amoeba(hydrogenMass=1.0):
     return system, pdb.positions
 
 
-def converge(simulation, n_steps=1, Neff_cutoff=1E4, sleep_time=45, filename=None):
-
+def converge(simulation, csv_filename, Neff_cutoff=1E4, sleep_time=0.5 * u.minutes):
     integrator = simulation.integrator
     itype = type(integrator).__name__
-
-    data = None
-
-    t00 = time.time()
-    t0 = time.time() - t00
-    t1 = time.time() - t00
-
     while True:
-        integrator.step(n_steps)
+        simulation.runForClockTime(sleep_time)
+        data = pd.read_csv(csv_filename)
 
-        state = simulation.context.getState(getEnergy=True)
-        energy = state.getPotentialEnergy() / u.kilojoules_per_mole
-
-        elapsed = time.time() - t00
-        current_data = dict(energy=energy, elapsed=elapsed)
-
-        if data is None:
-            data = pd.DataFrame([current_data])
-        else:
-            data.ix[len(data)] = current_data
-
-        t1 = time.time() - t00
-
-        if t1 - t0 < sleep_time:
-            continue
-
-        energies = data.energy.values
+        energies = data['Potential Energy (kJ/mole)'].values
         g = pymbar.timeseries.statisticalInefficiency(energies)
         Neff = len(energies) / g
 
@@ -120,11 +103,6 @@ def converge(simulation, n_steps=1, Neff_cutoff=1E4, sleep_time=45, filename=Non
             other_str = ""
 
         print("t0=%f, energy = %.4f + %.3f, N=%d, g=%.4f, Neff=%.4f, stderr=%f elapsed=%f Neff/s=%f other=%s" % (t0, mu, sigma, len(energies), g, Neff, stderr, elapsed, Neff / elapsed, other_str))
-
-        if filename is not None:
-            data.to_csv(filename)
-
-        t0 = t1
 
         if Neff > Neff_cutoff:
             return data, g, Neff, mu, sigma, stderr
@@ -353,10 +331,13 @@ def load(sysname):
         testsystem = testsystems.AlanineDipeptideExplicit(cutoff=1.1*u.nanometers, switch_width=2*u.angstrom, ewaldErrorTolerance=5E-5)
         system, positions = testsystem.system, testsystem.positions
         #groups = [(0, 2), (1, 1), (2, 1)]
-        groups = [(0, 2), (1, 1)]
+        #groups = [(0, 2), (1, 1)]
         timestep = 1.0 * u.femtoseconds
         #hmc_integrators.guess_force_groups(system, nonbonded=1, others=0, fft=2)
-        hmc_integrators.guess_force_groups(system, nonbonded=0, others=0, fft=1)
+        #hmc_integrators.guess_force_groups(system, nonbonded=0, others=0, fft=1)
+        groups = [(0, 1), (1, 2)]
+        hmc_integrators.guess_force_groups(system, nonbonded=0, others=1, fft=0)
+
         #remove_cmm(system)  # Unrolled doesn't need this
         equil_steps = 4000
         """
@@ -393,9 +374,9 @@ def load(sysname):
 
 
     elif "water" in sysname:
-        timestep = 1.5 * u.femtoseconds
-        groups = [(0, 2), (1, 1)]
-        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1)
+        timestep = 4.0 * u.femtoseconds
+        groups = [(0, 1), (1, 2)]
+        hmc_integrators.guess_force_groups(system, nonbonded=1, fft=0)
         equil_steps = 10000
         """
 
@@ -419,3 +400,20 @@ def load(sysname):
 
 
     return system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc
+
+def get_grid(temperature, timestep, langevin_timestep, groups, steps_per_hmc=100, extra_chances=5):
+
+    integrators = []
+    integrators.append(mm.LangevinIntegrator(temperature, 1.0 / u.picoseconds, langevin_timestep))
+
+    collision_rate = None
+    integrators.append(hmc_integrators.GHMCIntegrator(temperature=temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, collision_rate=collision_rate))
+    integrators.append(hmc_integrators.XCGHMCIntegrator(temperature=temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, extra_chances=extra_chances, collision_rate=collision_rate))
+    integrators.append(hmc_integrators.XCGHMCRESPAIntegrator(temperature=temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, extra_chances=extra_chances, groups=groups, collision_rate=collision_rate))
+
+    integrators.append(hmc_integrators.XCGHMCIntegrator(temperature=temperature, steps_per_hmc=steps_per_hmc, timestep=timestep * 2, extra_chances=extra_chances, collision_rate=collision_rate))
+
+    collision_rate = 1E1 / u.picoseconds
+    integrators.append(hmc_integrators.XCGHMCIntegrator(temperature=temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, extra_chances=extra_chances, collision_rate=collision_rate))
+
+    return integrators

@@ -7,21 +7,10 @@ import pandas as pd
 
 lag_time = 25
 
-#filename0 = "./data/mixed_alanineexplicit_LangevinIntegrator_2.000_0.%s"
-#filename0 = "./data/mixed_alanineexplicit_XCHMCRESPAIntegrator_2.000_0.%s"
-#filename1 = "./data/mixed_alanineexplicit_XCHMCRESPAIntegrator_2.886_0.%s"
-#filename1 = "./data/mixed_alanineexplicit_XCHMCRESPAIntegrator_4.000_0.%s"
-
-#filename0 = "./data/mixed_alanine_LangevinIntegrator_2.000_0.%s"
-#filename0 = "./data/mixed_alanine_XCHMCIntegrator_4.598_1.%s"
-#filename1 = "./data/mixed_alanine_XCHMCIntegrator_4.029_1.%s"
-#filename1 = "./data/mixed_alanine_XCGHMCIntegrator_3.988_100.%s"
-#filename1 = "./data/mixed_alanine_LangevinIntegrator_2.000_100.%s"
-#filename1 = "./data/mixed_alanine_XCHMCIntegrator_4.000_1.%s"
-
 filename0 = "./data/mixed_alanineexplicit_LangevinIntegrator_2.000_0.%s"
-#filename1 = "./data/mixed_alanineexplicit_XCHMCIntegrator_2.883_1.%s"
-filename1 = "./data/mixed_alanineexplicit_UnrolledXCHMCIntegrator_3.990_1.%s"
+#filename1 = "./data/mixed_alanineexplicit_XCGHMCRESPAIntegrator_4.250_0.%s"
+filename1 = "./data/mixed_alanineexplicit_XCGHMCIntegrator_3.750_0.%s"
+#filename1 = "./data/mixed_alanineexplicit_XCGHMCIntegrator_3.750_-1.%s"
 
 top = md.load(filename0 % "pdb")
 
