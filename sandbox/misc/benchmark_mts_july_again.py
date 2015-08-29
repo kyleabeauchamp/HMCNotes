@@ -4,45 +4,22 @@ import simtk.openmm as mm
 from simtk import unit as u
 from openmmtools import hmc_integrators, testsystems, integrators
 
-#testsystem = testsystems.DHFRExplicit()
 testsystem = testsystems.DHFRExplicit(rigid_water=False, constraints=None)
 
 system, topology, positions = testsystem.system, testsystem.topology, testsystem.positions
 
 platform = mm.Platform.getPlatformByName('CUDA')
-#properties = {}
 properties = {'CudaPrecision': "single"}
 
 temperature = 1 * u.kelvin
-timestep = 4.0 * u.femtoseconds
+timestep = 1.0 * u.femtoseconds
 steps = 5000
 
-#hmc_integrators.guess_force_groups(system, nonbonded=1, others=2, fft=0)
-#groups = [(0, 1), (1, 2), (2, 4)]  # 59.3 ns / day
-
 #hmc_integrators.guess_force_groups(system, nonbonded=0, others=1, fft=0)
-#groups = [(0, 1), (1, 1)]  # 79.4 ns / day
-
-#hmc_integrators.guess_force_groups(system, nonbonded=0, others=1, fft=0)
-#groups = [(0, 1), (1, 2)]  # 98.5 ns / day
-
-#hmc_integrators.guess_force_groups(system, nonbonded=0, others=0, fft=0)
-#groups = [(0, 1), (1, 2)]  # 94.2
-
-#hmc_integrators.guess_force_groups(system, nonbonded=0, others=0, fft=0)
-#groups = [(0, 1), (1, 4)]  # 78.1 CUDA, 0.317 CPU
-
-#hmc_integrators.guess_force_groups(system, nonbonded=0, others=0, fft=0)
-#groups = [(1, 4)]  # Just update velocities and positions
-
-#hmc_integrators.guess_force_groups(system, nonbonded=0, others=0, fft=0)
-#groups = [(0, 1)]  # 111.6 ns / day CUDA, 1.065 CPU
-
-#hmc_integrators.guess_force_groups(system, nonbonded=0, others=0, fft=0)
-#groups = [(0, 1)]
+#groups = [(0, 1), (1, 4)]
 
 hmc_integrators.guess_force_groups(system, nonbonded=0, others=0, fft=0)
-groups = [(0, 1), (1, 4)]
+groups = [(0, 1)]
 
 
 integrator = mm.MTSIntegrator(timestep, groups)
@@ -62,4 +39,24 @@ inner_per_sec = outer_per_sec * groups[-1][1]
 ns_per_day = (timestep / u.nanoseconds) * outer_per_day
 
 
-dt, ns_per_day, outer_per_sec, inner_per_sec
+print groups
+print mm.version.full_version, dt, ns_per_day, outer_per_sec, inner_per_sec
+
+
+
+"""
+[(0, 1)]
+6.3.0.dev-9b345f2 12.7207889557 33.9601577783 393.057381694 393.057381694
+
+[(0, 1), (1, 4)]
+6.3.0.dev-9b345f2 14.9431400299 28.9095865484 334.601696162 1338.406784
+
+
+[(0, 1)]
+6.3.0.dev-637de3d 13.2098071575 32.7029755127 378.506661027 378.506661027
+
+[(0, 1), (1, 4)]
+6.3.0.dev-637de3d 15.7206330299 27.4798094439 318.053350045 1272.21340018
+
+
+"""

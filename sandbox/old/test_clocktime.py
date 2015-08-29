@@ -14,9 +14,14 @@ temperature = 1 * u.kelvin
 timestep = 0.5 * u.femtoseconds
 
 integrator = mm.VerletIntegrator(timestep)
+
 simulation = app.Simulation(topology, system, integrator, platform=platform, platformProperties=properties)
+csv_filename = "./test.csv"
+output_frequency = 1
 
 simulation.context.setPositions(positions)
 simulation.context.setVelocitiesToTemperature(temperature)
+integrator.step(1)  # Pre-build the customintegrator if applicable
+simulation.reporters.append(app.StateDataReporter(csv_filename, output_frequency, step=True, time=True, potentialEnergy=True, temperature=True, density=True, elapsedTime=True))
 
-%time simulation.runForClockTime(0.1 * u.minutes)
+simulation.runForClockTime(1 * u.seconds)

@@ -4,45 +4,26 @@ import simtk.openmm as mm
 from simtk import unit as u
 from openmmtools import hmc_integrators, testsystems, integrators
 
-#testsystem = testsystems.DHFRExplicit()
 testsystem = testsystems.DHFRExplicit(rigid_water=False, constraints=None)
 
 system, topology, positions = testsystem.system, testsystem.topology, testsystem.positions
 
 platform = mm.Platform.getPlatformByName('CUDA')
-#properties = {}
 properties = {'CudaPrecision': "single"}
 
 temperature = 1 * u.kelvin
-timestep = 4.0 * u.femtoseconds
+timestep = 2.0 * u.femtoseconds
 steps = 5000
-
-#hmc_integrators.guess_force_groups(system, nonbonded=1, others=2, fft=0)
-#groups = [(0, 1), (1, 2), (2, 4)]  # 59.3 ns / day
-
-#hmc_integrators.guess_force_groups(system, nonbonded=0, others=1, fft=0)
-#groups = [(0, 1), (1, 1)]  # 79.4 ns / day
-
-#hmc_integrators.guess_force_groups(system, nonbonded=0, others=1, fft=0)
-#groups = [(0, 1), (1, 2)]  # 98.5 ns / day
-
-#hmc_integrators.guess_force_groups(system, nonbonded=0, others=0, fft=0)
-#groups = [(0, 1), (1, 2)]  # 94.2
-
-#hmc_integrators.guess_force_groups(system, nonbonded=0, others=0, fft=0)
-#groups = [(0, 1), (1, 4)]  # 78.1 CUDA, 0.317 CPU
-
-#hmc_integrators.guess_force_groups(system, nonbonded=0, others=0, fft=0)
-#groups = [(1, 4)]  # Just update velocities and positions
-
-#hmc_integrators.guess_force_groups(system, nonbonded=0, others=0, fft=0)
-#groups = [(0, 1)]  # 111.6 ns / day CUDA, 1.065 CPU
 
 #hmc_integrators.guess_force_groups(system, nonbonded=0, others=0, fft=0)
 #groups = [(0, 1)]
+# new (65.32461094856262, 13.226255578932173, 76.54083089659821, 76.54083089659821)
+# old (64.60578417778015, 13.373415569455394, 77.39245121212612, 77.39245121212612)
 
 hmc_integrators.guess_force_groups(system, nonbonded=0, others=0, fft=0)
 groups = [(0, 1), (1, 4)]
+# new (69.01602101325989, 12.518832400291547, 72.44694676094645, 289.7877870437858)
+# old (68.56146907806396, 12.601830322746602, 72.92725881219098, 291.70903524876394)
 
 
 integrator = mm.MTSIntegrator(timestep, groups)

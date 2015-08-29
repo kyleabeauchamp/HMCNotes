@@ -411,7 +411,7 @@ def get_grid(temperature, timestep, langevin_timestep, groups, steps_per_hmc=100
     integrators.append(hmc_integrators.XCGHMCIntegrator(temperature=temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, extra_chances=extra_chances, collision_rate=collision_rate))
     integrators.append(hmc_integrators.XCGHMCRESPAIntegrator(temperature=temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, extra_chances=extra_chances, groups=groups, collision_rate=collision_rate))
 
-    integrators.append(hmc_integrators.XCGHMCIntegrator(temperature=temperature, steps_per_hmc=steps_per_hmc, timestep=timestep * 2, extra_chances=extra_chances, collision_rate=collision_rate))
+    integrators.append(hmc_integrators.XCGHMCIntegrator(temperature=temperature, steps_per_hmc=steps_per_hmc, timestep=timestep * 1.5, extra_chances=extra_chances, collision_rate=collision_rate))
 
     collision_rate = 1E1 / u.picoseconds
     integrators.append(hmc_integrators.XCGHMCIntegrator(temperature=temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, extra_chances=extra_chances, collision_rate=collision_rate))

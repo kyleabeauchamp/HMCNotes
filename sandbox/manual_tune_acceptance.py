@@ -16,7 +16,7 @@ positions, boxes = lb_loader.equilibrate(testsystem, temperature, timestep, step
 
 
 del simulation, integrator
-timestep = 4.25 * u.femtoseconds
+timestep = 8.0 * u.femtoseconds
 
 total_steps = 50000
 extra_chances = 10

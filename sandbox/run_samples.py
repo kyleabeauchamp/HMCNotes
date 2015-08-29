@@ -6,18 +6,18 @@ import simtk.openmm as mm
 from simtk import unit as u
 from openmmtools import hmc_integrators, testsystems
 
-sysname = "switchedaccuratewater"
+sysname = "chargedswitchedaccurateljbox"
 
 system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc = lb_loader.load(sysname)
 positions, boxes = lb_loader.equilibrate(testsystem, temperature, timestep, steps=equil_steps, minimize=True)
 
-collision_rate = 0.1 / u.picoseconds
+collision_rate = None
 
 del simulation, integrator
 
-timestep = 4.25 * u.femtoseconds
+timestep = 10. * u.femtoseconds
 extra_chances = 10
-steps_per_hmc = 619
+steps_per_hmc = 50
 output_frequency = 1
 
 groups = [(0, 1), (1, 2)]
@@ -39,7 +39,7 @@ pdb_filename = "./data/%s_%s_%.3f_%d.pdb" % prms
 dcd_filename = "./data/%s_%s_%.3f_%d.dcd" % prms
 
 simulation.reporters.append(app.StateDataReporter(csv_filename, output_frequency, step=True, time=True, potentialEnergy=True, temperature=True, density=True, elapsedTime=True))
-simulation.reporters.append(app.PDBReporter(pdb_filename, nsteps - 1))
+#simulation.reporters.append(app.PDBReporter(pdb_filename, nsteps - 1))
 simulation.reporters.append(app.DCDReporter(dcd_filename, output_frequency))
 
-simulation.runForClockTime(30 * u.minutes)
+simulation.runForClockTime(2 * u.hours)
