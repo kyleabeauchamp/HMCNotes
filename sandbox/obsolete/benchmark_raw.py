@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import simtk.openmm as mm
 from simtk import unit as u
-from openmmtools import integrators, testsystems
+from openmmtools import integrators, testsystems, hmc_integrators
 pd.set_option('display.width', 1000)
 
 n_steps = 1000
@@ -15,16 +15,17 @@ timestep = 1.0 * u.femtoseconds
 
 testsystem = testsystems.DHFRExplicit()
 system, positions = testsystem.system, testsystem.positions
-integrators.guess_force_groups(system, nonbonded=1, fft=1, others=0)
-positions = lb_loader.pre_equil(system, positions, temperature)
+equil_steps = 1000
+positions, boxes = lb_loader.equilibrate(testsystem, temperature, timestep, steps=equil_steps, minimize=True, use_hmc=False)
+hmc_integrators.guess_force_groups(system, nonbonded=1, fft=1, others=0)
+
 groups = [(0, 2), (1, 1)]
 
 idict = {
-"verlet": mm.VerletIntegrator(timestep), 
+"verlet": mm.VerletIntegrator(timestep),
 "langevin": mm.LangevinIntegrator(temperature, collision_rate, timestep),
 "vv": integrators.VelocityVerletIntegrator(timestep),
 "vvvr": integrators.VelocityVerletIntegrator(timestep),
-"ghmc1": integrators.GHMCIntegratorOneStep(temperature=temperature, collision_rate=collision_rate, timestep=timestep),
 "ghmc10": integrators.GHMCIntegrator(temperature=temperature, collision_rate=collision_rate, timestep=timestep, steps_per_hmc=10),
 "ghmc20": integrators.GHMCIntegrator(temperature=temperature, collision_rate=collision_rate, timestep=timestep, steps_per_hmc=20),
 "ghmcrespa20": integrators.GHMCRESPA(temperature, steps_per_hmc=20, timestep=timestep, collision_rate=collision_rate, groups=groups)
@@ -38,7 +39,7 @@ for name, integrator in idict.items():
     context = mm.Context(system, integrator)
     context.setPositions(positions)
     context.setVelocitiesToTemperature(temperature)
-    integrator.step(1)    
+    integrator.step(1)
     t0 = time.time()
     cur_steps = n_steps / factors.get(name, 1)
     integrator.step(cur_steps)
