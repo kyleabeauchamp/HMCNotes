@@ -7,6 +7,10 @@ import numpy as np
 import simtk.openmm as mm
 from simtk import unit as u
 
+
+format_name = lambda prms: "{sysname}_{itype}_{timestep}_{collision}.".format(**prms)
+
+
 def fixunits(collision_rate):
     if collision_rate is None:
         return -1
@@ -136,6 +140,7 @@ def load_lj(cutoff=None, dispersion_correction=False, switch_width=None, shift=F
 
     timestep = 2 * u.femtoseconds
     langevin_timestep = 0.5 * u.femtoseconds
+    xcghmc_timestep = 28.0 * u.femtoseconds
 
     return testsystem, system, positions, timestep, langevin_timestep
 
@@ -309,24 +314,6 @@ def load(sysname):
         #remove_cmm(system)  # Unrolled shouldn't need this
         equil_steps = 10000
 
-        """
-        timestep = 4.5982 * u.femtoseconds
-        extra_chances = 3
-        steps_per_hmc = 25
-
-        # Below is less good but uses XCGHMC
-        collision_rate = 100. / u.picoseconds
-        output_frequency = 5
-        timestep = 3.988 * u.femtoseconds
-        extra_chances = 4
-        steps_per_hmc = 33
-
-        # Unrolled XCHMC
-        timestep = 3.75 * u.femtoseconds
-        extra_chances = 4
-        steps_per_hmc = 608
-        """
-
     if sysname == "alanineexplicit":
         testsystem = testsystems.AlanineDipeptideExplicit(cutoff=1.1*u.nanometers, switch_width=2*u.angstrom, ewaldErrorTolerance=5E-5)
         system, positions = testsystem.system, testsystem.positions
@@ -340,21 +327,7 @@ def load(sysname):
 
         #remove_cmm(system)  # Unrolled doesn't need this
         equil_steps = 4000
-        """
-        Unrolled
-        timestep = 3.99 * u.femtoseconds
-        extra_chances = 8
-        steps_per_hmc = 617
 
-        hmc_integrators.guess_force_groups(system, nonbonded=1, others=0, fft=2)
-        timestep = 4.75 * u.femtoseconds
-        steps_per_hmc = 350
-        extra_chances = 6
-        groups = [(0, 4), (1, 2), (2, 1)]
-        integrator = hmc_integrators.XCGHMCRESPAIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, extra_chances=extra_chances, groups=groups)
-
-
-        """
 
     # guess force groups
 
@@ -366,11 +339,6 @@ def load(sysname):
         groups = [(0, 2), (1, 1)]
         equil_steps = 10000
         steps_per_hmc = 15
-        """  # Optimal
-        timestep = 42.75125 * u.femtoseconds
-        extra_chances = 5
-        steps_per_hmc = 30
-        """
 
 
     elif "water" in sysname:
@@ -378,42 +346,7 @@ def load(sysname):
         groups = [(0, 1), (1, 2)]
         hmc_integrators.guess_force_groups(system, nonbonded=1, fft=0)
         equil_steps = 10000
-        """
 
-        timestep = 5.65 * u.femtoseconds
-        steps_per_hmc = 250
-        extra_chances = 6
-        groups = [(0, 2), (1, 1)]
-        integrator = hmc_integrators.UnrolledXCHMCRESPAIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, extra_chances=extra_chances, groups=groups)
-
-
-        extra_chances= 6.0
-        steps_per_hmc = 30.0
-        timestep = 1.5773278229552214 * 1.5 * u.femtoseconds
-        """
-        """
-        extra_chances= 2.0
-        steps_per_hmc = 25.0
-        timestep = 2.4208317230875265 * 1.5 * u.femtoseconds
-        groups = [(0, 2), (1, 1)]
-        """
 
 
     return system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc
-
-def get_grid(temperature, timestep, langevin_timestep, groups, steps_per_hmc=100, extra_chances=5):
-
-    integrators = []
-    integrators.append(mm.LangevinIntegrator(temperature, 1.0 / u.picoseconds, langevin_timestep))
-
-    collision_rate = None
-    integrators.append(hmc_integrators.GHMCIntegrator(temperature=temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, collision_rate=collision_rate))
-    integrators.append(hmc_integrators.XCGHMCIntegrator(temperature=temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, extra_chances=extra_chances, collision_rate=collision_rate))
-    integrators.append(hmc_integrators.XCGHMCRESPAIntegrator(temperature=temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, extra_chances=extra_chances, groups=groups, collision_rate=collision_rate))
-
-    integrators.append(hmc_integrators.XCGHMCIntegrator(temperature=temperature, steps_per_hmc=steps_per_hmc, timestep=timestep * 1.5, extra_chances=extra_chances, collision_rate=collision_rate))
-
-    collision_rate = 1E1 / u.picoseconds
-    integrators.append(hmc_integrators.XCGHMCIntegrator(temperature=temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, extra_chances=extra_chances, collision_rate=collision_rate))
-
-    return integrators
