@@ -4,27 +4,13 @@ import pymbar
 import pandas as pd
 import numpy as np
 pd.set_option('display.width', 1000)
+from lb_loader import summarize
 
-def summarize(filename):
-    statedata = pd.read_csv(filename)
-    energies = statedata["Potential Energy (kJ/mole)"].values
-    if "Kinetic Energy (kJ/mole)" in statedata.columns:
-        holding = pd.read_csv(filename)["Kinetic Energy (kJ/mole)"].values
-        mu = holding.dot(energies) / holding.sum()
-        mu = energies.mean()
-    else:
-        mu = energies.mean()
-    g = pymbar.timeseries.statisticalInefficiency(energies)
-    Neff = max(1, len(energies) / g)
-    sigma = energies.std()
-    stderr = sigma * Neff ** -0.5
-
-    return dict(filename=filename, g=g, Neff=Neff, mu=mu, sigma=sigma, stderr=stderr)
-
-filenames = glob.glob("data/*.csv")
+filenames = glob.glob("data/switchedaccurateflexiblewater/*.csv")
 data = []
 for filename in filenames:
-    data.append(summarize(filename))
+    data.append(summarize(filename)[1])
 
 data = pd.DataFrame(data)
+data["filename"] = data["filename"].str[35:]
 data.sort("filename")

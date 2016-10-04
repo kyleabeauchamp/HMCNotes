@@ -13,16 +13,16 @@ precision = "mixed"
 #collision_rate = 1. / u.picoseconds
 collision_rate = None
 
-sysname = "switchedljbox"
+sysname = "switchedaccurateflexiblewater"
 
 system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc = lb_loader.load(sysname)
-positions, boxes = lb_loader.equilibrate(testsystem, temperature, timestep, steps=equil_steps, minimize=True, steps_per_hmc=steps_per_hmc)
+positions, boxes = lb_loader.equilibrate(testsystem, temperature, langevin_timestep, steps=equil_steps, minimize=True, steps_per_hmc=steps_per_hmc)
 
-max_evals = 20
+max_evals = 30
 
-steps_per_hmc = hp.quniform("steps_per_hmc", 15, 50, 1)
-extra_chances = hp.quniform("extra_chances", 1, 5, 1)
-timestep = hp.uniform("timestep", 25.0, 35.0)
+steps_per_hmc = hp.quniform("steps_per_hmc", 10, 30, 1)
+extra_chances = hp.quniform("extra_chances", 1, 3, 1)
+timestep = hp.uniform("timestep", 0.5, 1.25)
 
 
 def inner_objective(args):

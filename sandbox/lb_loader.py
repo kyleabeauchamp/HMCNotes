@@ -8,7 +8,7 @@ import simtk.openmm as mm
 from simtk import unit as u
 
 
-format_name = lambda prms: "{sysname}_{itype}_{timestep}_{collision}.".format(**prms)
+format_name = lambda prms: "{sysname}/{itype}_{timestep}_{collision}.".format(**prms)
 
 
 def fixunits(collision_rate):
@@ -59,7 +59,7 @@ def equilibrate(testsystem, temperature, timestep, steps=40000, npt=False, minim
     print(system.getDefaultPeriodicBoxVectors())
 
     testsystem.positions = positions
-    return positions, boxes
+    return positions, boxes, state
 
 
 def load_lb(cutoff=1.1 * u.nanometers, constraints=app.HBonds, hydrogenMass=1.0 * u.amu):
@@ -85,33 +85,37 @@ def load_amoeba(hydrogenMass=1.0):
     system = forcefield.createSystem(pdb.topology, nonbondedMethod=app.PME, nonbondedCutoff=1.0*u.nanometers, hydrogenMass=hydrogenMass * u.amu, rigidWater=False)
     return system, pdb.positions
 
+def summarize(filename):
+    statedata = pd.read_csv(filename)
+    energies = statedata["Potential Energy (kJ/mole)"].values
+    if "Kinetic Energy (kJ/mole)" in statedata.columns:
+        holding = pd.read_csv(filename)["Kinetic Energy (kJ/mole)"].values
+        mu = holding.dot(energies) / holding.sum()
+        mu = energies.mean()
+    else:
+        mu = energies.mean()
+    g = pymbar.timeseries.statisticalInefficiency(energies)
+    Neff = max(1, len(energies) / g)
+    sigma = energies.std()
+    stderr = sigma * Neff ** -0.5
+    walltime = statedata["Elapsed Time (s)"].max()
+    neffs = Neff / walltime
+
+    return statedata, pd.Series(dict(filename=filename, g=g, Neff=Neff, mu=mu, sigma=sigma, stderr=stderr, walltime=walltime, Neff_per_sec=neffs))
+
 
 def converge(simulation, csv_filename, Neff_cutoff=1E4, sleep_time=0.5 * u.minutes):
     integrator = simulation.integrator
     itype = type(integrator).__name__
     while True:
         simulation.runForClockTime(sleep_time)
-        data = pd.read_csv(csv_filename)
+        statedata, results = summarize(csv_filename)
+        print(results)
 
-        energies = data['Potential Energy (kJ/mole)'].values
-        g = pymbar.timeseries.statisticalInefficiency(energies)
-        Neff = len(energies) / g
+        if results.Neff > Neff_cutoff:
+            return statedata, results
 
-        mu = energies.mean()
-        sigma = energies.std()
-        stderr = sigma * Neff ** -0.5
-
-        if "HMC" in itype:
-            other_str = "arate=%.3f" % integrator.acceptance_rate
-        else:
-            other_str = ""
-
-        print("t0=%f, energy = %.4f + %.3f, N=%d, g=%.4f, Neff=%.4f, stderr=%f elapsed=%f Neff/s=%f other=%s" % (t0, mu, sigma, len(energies), g, Neff, stderr, elapsed, Neff / elapsed, other_str))
-
-        if Neff > Neff_cutoff:
-            return data, g, Neff, mu, sigma, stderr
-
-def build(testsystem, integrator, temperature, precision="mixed"):
+def build(testsystem, integrator, temperature, precision="mixed", state=None):
     system, topology, positions = testsystem.system, testsystem.topology, testsystem.positions
 
     try:
@@ -127,6 +131,10 @@ def build(testsystem, integrator, temperature, precision="mixed"):
 
     context = simulation.context
     context.setPositions(positions)
+
+    if state is not None:
+        context.setState(state)
+
     context.setVelocitiesToTemperature(temperature)
 
     return simulation
@@ -140,7 +148,8 @@ def load_lj(cutoff=None, dispersion_correction=False, switch_width=None, shift=F
 
     timestep = 2 * u.femtoseconds
     langevin_timestep = 0.5 * u.femtoseconds
-    xcghmc_timestep = 28.0 * u.femtoseconds
+    # optimal xcghmc parms determined via hyperopt
+    xcghmc_parms = dict(timestep=32.235339 * u.femtoseconds, steps_per_hmc=16, extra_chances=1, collision_rate=None)
 
     return testsystem, system, positions, timestep, langevin_timestep
 
@@ -248,6 +257,13 @@ def load(sysname):
     if sysname == "switchedaccuratewater":
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=1.1*u.nanometers, switch_width=3.0*u.angstroms, ewaldErrorTolerance=5E-5)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
+
+    if sysname == "switchedaccurateflexiblewater":
+        testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=1.1*u.nanometers, switch_width=3.0*u.angstroms, ewaldErrorTolerance=5E-5, constrained=False)  # Around 1060 molecules of water
+        system, positions = testsystem.system, testsystem.positions
+        equil_steps = 100000
+        langevin_timestep = 0.25 * u.femtoseconds
+
 
     if sysname == "switchedaccuratenptwater":
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=1.1*u.nanometers, switch_width=3.0*u.angstroms, ewaldErrorTolerance=5E-5)  # Around 1060 molecules of water
