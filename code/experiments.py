@@ -10,45 +10,50 @@ from collections import OrderedDict
 
 def enumerate_experiments():
     experiments = OrderedDict()
-
+    extra_chances = 3
     ############################################################################
-    system = "switchedljbox"
+    sysname = "switchedljbox"
+    system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc = lb_loader.load(sysname)
     ############################################################################
-
-    for timestep in [1.0 * langevin_timestep, 4.0 * langevin_timestep]:
+    for timestep in [0.5 * u.femtoseconds, 2.0 * u.femtoseconds]:
         collision_rate = 1.0 / u.picoseconds
         integrator = mm.LangevinIntegrator(temperature, collision_rate, timestep)
         itype = type(integrator).__name__
         prms = dict(sysname=sysname, itype=itype, timestep=timestep / u.femtoseconds, collision=lb_loader.fixunits(collision_rate))
-        fmt_string = lb_loader.format_name(prms)
-        experiments[fmt_string] = integrator
+        int_string = lb_loader.format_int_name(prms)
+        key = (sysname, int_string)
+        experiments[key] = integrator
 
     collision_rate = None
-    for timestep in [timestep, 20 * u.femtoseconds]:
+    for timestep in [2.0 * u.femtoseconds, 20.0 * u.femtoseconds]:
         integrator = hmc_integrators.GHMCIntegrator(temperature=temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, collision_rate=collision_rate)
         itype = type(integrator).__name__
         prms = dict(sysname=sysname, itype=itype, timestep=timestep / u.femtoseconds, collision=lb_loader.fixunits(collision_rate))
-        fmt_string = lb_loader.format_name(prms)
-        experiments[fmt_string] = integrator
+        int_string = lb_loader.format_int_name(prms)
+        key = (sysname, int_string)
+        experiments[key] = integrator
 
     collision_rate = None
-    for timestep in [timestep]:
+    for timestep in [2.0 * u.femtoseconds]:
         integrator = hmc_integrators.XCGHMCIntegrator(temperature=temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, extra_chances=extra_chances, collision_rate=collision_rate)
         itype = type(integrator).__name__
         prms = dict(sysname=sysname, itype=itype, timestep=timestep / u.femtoseconds, collision=lb_loader.fixunits(collision_rate))
-        fmt_string = lb_loader.format_name(prms)
-        experiments[fmt_string] = integrator
+        int_string = lb_loader.format_int_name(prms)
+        key = (sysname, int_string)
+        experiments[key] = integrator
 
 
-    xcghmc_parms = dict(timestep=32.235339 * u.femtoseconds, steps_per_hmc=16, extra_chances=1, collision_rate=None)
+    xcghmc_parms = dict(timestep=32.2 * u.femtoseconds, steps_per_hmc=16, extra_chances=1, collision_rate=None)
     integrator = hmc_integrators.XCGHMCIntegrator(temperature=temperature, **xcghmc_parms)
     itype = type(integrator).__name__
     prms = dict(sysname=sysname, itype=itype, timestep=integrator.timestep / u.femtoseconds, collision=lb_loader.fixunits(None))
-    fmt_string = lb_loader.format_name(prms)
-    experiments[fmt_string] = integrator
+    int_string = lb_loader.format_int_name(prms)
+    key = (sysname, int_string)
+    experiments[key] = integrator
 
     ############################################################################
-    system = "switchedaccurateflexiblewater"
+    sysname = "switchedaccurateflexiblewater"
+    system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc = lb_loader.load(sysname)
     ############################################################################
 
     for timestep in [0.10 * u.femtoseconds, 0.15 * u.femtoseconds, 0.5 * u.femtoseconds]:
@@ -56,16 +61,18 @@ def enumerate_experiments():
         integrator = mm.LangevinIntegrator(temperature, collision_rate, timestep)
         itype = type(integrator).__name__
         prms = dict(sysname=sysname, itype=itype, timestep=timestep / u.femtoseconds, collision=lb_loader.fixunits(collision_rate))
-        fmt_string = lb_loader.format_name(prms)
-        experiments[fmt_string] = (integrator, testsystem)
+        int_string = lb_loader.format_int_name(prms)
+        key = (sysname, int_string)
+        experiments[key] = integrator
 
     collision_rate = None
     for timestep in [0.4 * u.femtoseconds, 0.5 * u.femtoseconds]:
         integrator = hmc_integrators.GHMCIntegrator(temperature=temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, collision_rate=collision_rate)
         itype = type(integrator).__name__
         prms = dict(sysname=sysname, itype=itype, timestep=timestep / u.femtoseconds, collision=lb_loader.fixunits(collision_rate))
-        fmt_string = lb_loader.format_name(prms)
-        experiments[fmt_string] = integrator
+        int_string = lb_loader.format_int_name(prms)
+        key = (sysname, int_string)
+        experiments[key] = integrator
 
     collision_rate = None
     timestep = 0.5 * u.femtoseconds
@@ -74,16 +81,17 @@ def enumerate_experiments():
     integrator = hmc_integrators.XCGHMCIntegrator(temperature=temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, extra_chances=extra_chances, collision_rate=collision_rate)
     itype = type(integrator).__name__
     prms = dict(sysname=sysname, itype=itype, timestep=timestep / u.femtoseconds, collision=lb_loader.fixunits(collision_rate))
-    fmt_string = lb_loader.format_name(prms)
-    experiments[fmt_string] = integrator
+    int_string = lb_loader.format_int_name(prms)
+    key = (sysname, int_string)
+    experiments[key] = integrator
 
 
-    xcghmc_parms = dict(timestep=0.6679965180243563 * u.femtoseconds, steps_per_hmc=10, extra_chances=1, collision_rate=None)
+    xcghmc_parms = dict(timestep=0.668 * u.femtoseconds, steps_per_hmc=10, extra_chances=1, collision_rate=None)
     integrator = hmc_integrators.XCGHMCIntegrator(temperature=temperature, **xcghmc_parms)
     itype = type(integrator).__name__
     prms = dict(sysname=sysname, itype=itype, timestep=integrator.timestep / u.femtoseconds, collision=lb_loader.fixunits(None))
-    fmt_string = lb_loader.format_name(prms)
-    experiments[fmt_string] = integrator
-
+    int_string = lb_loader.format_int_name(prms)
+    key = (sysname, int_string)
+    experiments[key] = integrator
 
     return experiments

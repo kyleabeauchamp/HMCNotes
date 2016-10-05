@@ -1,25 +1,26 @@
+#!/usr/bin/env python
 import lb_loader
 import simtk.openmm.app as app
 import simtk.openmm as mm
 from simtk import unit as u
 from openmmtools import hmc_integrators, testsystems
+from experiments import enumerate_experiments
+import pickle
 import sys
 
 def run():
-    sysname, intname, Neff_cutoff = sys.argv[1:]
+    system_filename, state_filename, integrator_filename, sysname, Neff_cutoff, csv_filename, dcd_filename = sys.argv[1:]
 
-    system_filename = "./data/systems/%s_system.xml" % sysname
-    state_filename = "./data/systems/%s_state.xml" % sysname
+    Neff_cutoff = float(Neff_cutoff)
 
-    csv_filename = "./data/{sysname}/{intname}.csv".format(sysname=sysname, intname=intname)
-    pdb_filename = "./data/%s.pdb" % fmt_string
-    dcd_filename = "./data/%s.dcd" % fmt_string
+    system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc = lb_loader.load(sysname)
 
     state = mm.XmlSerializer.deserialize(open(state_filename).read())
-    system = mm.XmlSerializer.deserialize(open(system_filename).read())
+    testsystem = pickle.load(open(system_filename, 'rb'))
+    integrator = pickle.load(open(integrator_filename, 'rb'))
 
     itype = type(integrator).__name__
-    print("%s    %s" % (fmt_string, itype))
+    print(itype)
 
     simulation = lb_loader.build(testsystem, integrator, temperature, state=state)
     simulation.runForClockTime(0.5 * u.minutes)

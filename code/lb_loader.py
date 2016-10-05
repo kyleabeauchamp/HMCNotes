@@ -7,8 +7,12 @@ import numpy as np
 import simtk.openmm as mm
 from simtk import unit as u
 
-
+format_int_name = lambda prms: "{itype}_{timestep}_{collision}".format(**prms)
 format_name = lambda prms: "{sysname}/{itype}_{timestep}_{collision}.".format(**prms)
+
+def write_file(filename, contents):
+    with open(filename, 'w') as outfile:
+        outfile.write(contents)
 
 
 def fixunits(collision_rate):
@@ -56,7 +60,6 @@ def equilibrate(testsystem, temperature, timestep, steps=40000, npt=False, minim
         system.removeForce(barostat_index)
 
     system.setDefaultPeriodicBoxVectors(*boxes)  # Doesn't hurt to reset boxes
-    print(system.getDefaultPeriodicBoxVectors())
 
     testsystem.positions = positions
     return positions, boxes, state
@@ -110,7 +113,7 @@ def converge(simulation, csv_filename, Neff_cutoff=1E4, sleep_time=0.5 * u.minut
     while True:
         simulation.runForClockTime(sleep_time)
         statedata, results = summarize(csv_filename)
-        print(results)
+        print(results.to_frame().T)
 
         if results.Neff > Neff_cutoff:
             return statedata, results
