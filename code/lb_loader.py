@@ -7,6 +7,9 @@ import numpy as np
 import simtk.openmm as mm
 from simtk import unit as u
 
+PLATFORM = "CUDA"
+PRECISION = "mixed"
+
 format_int_name = lambda prms: "{itype}_{timestep}_{collision}".format(**prms)
 format_name = lambda prms: "{sysname}/{itype}_{timestep}_{collision}.".format(**prms)
 
@@ -30,7 +33,7 @@ def remove_cmm(system):
             break
 
 
-def equilibrate(testsystem, temperature, timestep, steps=40000, npt=False, minimize=True, steps_per_hmc=25, use_hmc=False):
+def equilibrate(testsystem, temperature, timestep, steps=40000, npt=False, minimize=True, steps_per_hmc=25, use_hmc=False, platform_name=PLATFORM, precision=PRECISION):
     system, topology, positions = testsystem.system, testsystem.topology, testsystem.positions
 
     if npt:
@@ -42,7 +45,7 @@ def equilibrate(testsystem, temperature, timestep, steps=40000, npt=False, minim
     else:
         integrator = mm.LangevinIntegrator(temperature, 2.0 / u.picoseconds, timestep)
 
-    simulation = build(testsystem, integrator, temperature)
+    simulation = build(testsystem, integrator, temperature, platform_name=platform_name, precision=precision)
 
     if minimize:
         simulation.minimizeEnergy()
@@ -118,13 +121,19 @@ def converge(simulation, csv_filename, Neff_cutoff=1E4, sleep_time=0.5 * u.minut
         if results.Neff > Neff_cutoff:
             return statedata, results
 
-def build(testsystem, integrator, temperature, precision="mixed", state=None):
+def build(testsystem, integrator, temperature, precision="mixed", state=None, platform_name="CUDA"):
     system, topology, positions = testsystem.system, testsystem.topology, testsystem.positions
 
     try:
-        platform = mm.Platform.getPlatformByName('CUDA')
-        properties = {'CudaPrecision': precision}
-        simulation = app.Simulation(topology, system, integrator, platform=platform, platformProperties=properties)
+        platform = mm.Platform.getPlatformByName(platform_name)
+        if platform_name == "CUDA":
+            properties = {'CudaPrecision': precision}
+            simulation = app.Simulation(topology, system, integrator, platform=platform, platformProperties=properties)
+        if platform_name == "OpenCL":
+            properties = {'Precision': precision}
+            simulation = app.Simulation(topology, system, integrator, platform=platform, platformProperties=properties)
+        elif platform_name == "CPU":
+            simulation = app.Simulation(topology, system, integrator, platform=platform)
         #context = mm.Context(system, integrator, platform, properties)
     except Exception as e:
         print(e)
