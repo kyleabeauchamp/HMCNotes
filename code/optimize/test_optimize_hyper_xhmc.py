@@ -8,21 +8,20 @@ from simtk import unit as u
 from openmmtools import hmc_integrators, testsystems
 pd.set_option('display.width', 1000)
 
-n_steps = 500
+n_steps = 300
+platform_name = "CUDA"
 precision = "mixed"
-#collision_rate = 1. / u.picoseconds
-collision_rate = None
 
 sysname = "switchedaccurateflexiblewater"
 
 system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc = lb_loader.load(sysname)
-positions, boxes = lb_loader.equilibrate(testsystem, temperature, langevin_timestep, steps=equil_steps, minimize=True, steps_per_hmc=steps_per_hmc)
+positions, boxes, state = lb_loader.equilibrate(testsystem, temperature, langevin_timestep, steps=equil_steps, minimize=True, use_hmc=False, precision=precision, platform_name=platform_name)
 
-max_evals = 30
+max_evals = 35
 
-steps_per_hmc = hp.quniform("steps_per_hmc", 10, 30, 1)
-extra_chances = hp.quniform("extra_chances", 1, 3, 1)
-timestep = hp.uniform("timestep", 0.5, 1.25)
+steps_per_hmc = hp.quniform("steps_per_hmc", 9, 30, 1)
+extra_chances = hp.quniform("extra_chances", 1, 4, 1)
+timestep = hp.uniform("timestep", 0.25, 1.0)
 
 
 def inner_objective(args):
@@ -32,8 +31,8 @@ def inner_objective(args):
     current_timestep = timestep * u.femtoseconds
     extra_chances = int(extra_chances)
     steps_per_hmc = int(steps_per_hmc)
-    integrator = hmc_integrators.XCGHMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=current_timestep, extra_chances=extra_chances, collision_rate=collision_rate)
-    simulation = lb_loader.build(testsystem, integrator, temperature, precision=precision)
+    integrator = hmc_integrators.XCGHMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=current_timestep, extra_chances=extra_chances)
+    simulation = lb_loader.build(testsystem, integrator, temperature, precision=precision, platform_name=platform_name)
     simulation.integrator.step(n_steps)
     return integrator, simulation  # Have to pass simulation to keep it from being garbage collected
 

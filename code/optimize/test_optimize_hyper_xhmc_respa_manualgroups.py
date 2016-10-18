@@ -8,21 +8,22 @@ from simtk import unit as u
 from openmmtools import hmc_integrators, testsystems
 pd.set_option('display.width', 1000)
 
-n_steps = 100
+n_steps = 300
+platform_name = "CUDA"
 precision = "mixed"
 
 sysname = "switchedaccurateflexiblewater"
 
 system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc = lb_loader.load(sysname)
-positions, boxes = lb_loader.equilibrate(testsystem, temperature, langevin_timestep, steps=equil_steps, minimize=True, steps_per_hmc=steps_per_hmc)
+positions, boxes, state = lb_loader.equilibrate(testsystem, temperature, langevin_timestep, steps=equil_steps, minimize=True, use_hmc=False, precision=precision, platform_name=platform_name)
 
-max_evals = 30
+max_evals = 35
 
-hmc_integrators.guess_force_groups(system, nonbonded=0, others=1, fft=0)
-steps_per_hmc = hp.quniform("steps_per_hmc", 10, 50, 1)
-extra_chances = hp.quniform("extra_chances", 1, 5, 1)
-timestep = hp.uniform("timestep", 1.0, 3.0)
-groups = [(0, 1), (1, 1)]
+
+steps_per_hmc = hp.quniform("steps_per_hmc", 9, 13, 1)
+extra_chances = hp.quniform("extra_chances", 2, 4, 1)
+timestep = hp.uniform("timestep", 1.2, 1.5)
+groups = ((0, 1), (1, 5))
 
 def inner_objective(args):
     steps_per_hmc, timestep, extra_chances = args
@@ -31,7 +32,7 @@ def inner_objective(args):
     extra_chances = int(extra_chances)
     steps_per_hmc = int(steps_per_hmc)
     integrator = hmc_integrators.XCGHMCRESPAIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=current_timestep, extra_chances=extra_chances, groups=groups)
-    simulation = lb_loader.build(testsystem, integrator, temperature, precision=precision)
+    simulation = lb_loader.build(testsystem, integrator, temperature, precision=precision, platform_name=platform_name)
     integrator.reset_time()
     integrator.step(n_steps)
     return integrator, simulation  # Have to pass simulation to keep it from being garbage collected

@@ -269,10 +269,13 @@ def load(sysname):
     if sysname == "switchedaccuratewater":
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=1.1*u.nanometers, switch_width=3.0*u.angstroms, ewaldErrorTolerance=5E-5)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
+        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1, others=0)  # We may want to try reduce
 
     if sysname == "switchedaccurateflexiblewater":
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=1.1*u.nanometers, switch_width=3.0*u.angstroms, ewaldErrorTolerance=5E-5, constrained=False)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
+        # Using these groups for hyperopt-optimal RESPA integrators
+        hmc_integrators.guess_force_groups(system, nonbonded=0, others=1, fft=0)
         equil_steps = 100000
         langevin_timestep = 0.25 * u.femtoseconds
 
@@ -367,6 +370,12 @@ def load(sysname):
         groups = [(0, 2), (1, 1)]
         equil_steps = 10000
         steps_per_hmc = 15
+
+    if sysname == "amoeba":
+        testsystem = testsystems.AMOEBAIonBox()
+        system, positions = testsystem.system, testsystem.positions
+        hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1, others=0)
+
 
 
     elif "water" in sysname:
