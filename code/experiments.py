@@ -122,13 +122,28 @@ def enumerate_experiments():
 
     xcghmc_parms = dict(timestep=0.6791 * u.femtoseconds, steps_per_hmc=20, collision_rate=None)
     xcghmc_parms.update(dict())
-    integrator = hmc_integrators.XCGHMCIntegrator(temperature=temperature **xcghmc_parms)
+    integrator = hmc_integrators.XCGHMCIntegrator(temperature=temperature, **xcghmc_parms)
     itype = type(integrator).__name__
     prms = dict(sysname=sysname, itype=itype, timestep=timestep / u.femtoseconds, collision=lb_loader.fixunits(collision_rate))
     int_string = lb_loader.format_int_name(prms)
     key = (sysname, int_string)
     experiments[key] = integrator
 
+    ############################################################################
+    sysname = "switchedaccuratebigflexiblewater"
+    system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc = lb_loader.load(sysname)
+    ############################################################################
+
+    experiments = OrderedDict()
+
+    # hyperopt determined optimal settings obtain ~113 effective ns / day
+    xcghmc_parms = dict(timestep=0.256927 * u.femtoseconds, steps_per_hmc=24, collision_rate=None, groups=((0, 4), (1, 1)))
+    integrator = hmc_integrators.GHMCRESPAIntegrator(temperature=temperature, **xcghmc_parms)
+    itype = type(integrator).__name__
+    prms = dict(sysname=sysname, itype=itype, timestep=integrator.timestep / u.femtoseconds, collision=lb_loader.fixunits(None))
+    int_string = lb_loader.format_int_name(prms)
+    key = (sysname, int_string)
+    experiments[key] = integrator
 
 
     return experiments

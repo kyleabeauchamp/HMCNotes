@@ -10,6 +10,8 @@ kT = openmmtools.constants.kB * 300. * u.kelvin / (u.kilojoules_per_mole)
 key = "Total Energy (kJ/mole)"
 
 filenames = glob.glob("./conservation/switchedaccurateflexiblewater*.csv")
+#filenames = glob.glob("./oldconserv/switchedaccurateflexiblewater*750*.csv")
+#filenames = glob.glob("./verlet/switchedaccurateflexiblewater*.csv")
 #filenames = glob.glob("./conservation/switchedaccuratewater*.csv")
 
 x = {}

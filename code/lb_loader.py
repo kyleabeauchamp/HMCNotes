@@ -275,9 +275,45 @@ def load(sysname):
         testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=1.1*u.nanometers, switch_width=3.0*u.angstroms, ewaldErrorTolerance=5E-5, constrained=False)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
         # Using these groups for hyperopt-optimal RESPA integrators
-        hmc_integrators.guess_force_groups(system, nonbonded=0, others=1, fft=0)
+        #hmc_integrators.guess_force_groups(system, nonbonded=0, others=1, fft=0)
+        hmc_integrators.guess_force_groups(system, nonbonded=1, others=1, fft=0)
         equil_steps = 100000
         langevin_timestep = 0.25 * u.femtoseconds
+
+    if sysname == "switchedaccuratebigflexiblewater":
+        testsystem = testsystems.WaterBox(box_edge=10.0 * u.nanometers, cutoff=1.1*u.nanometers, switch_width=3.0*u.angstroms, ewaldErrorTolerance=5E-5, constrained=False)  # Around 1060 molecules of water
+        system, positions = testsystem.system, testsystem.positions
+        # Using these groups for hyperopt-optimal RESPA integrators
+        #hmc_integrators.guess_force_groups(system, nonbonded=0, others=1, fft=0)
+        hmc_integrators.guess_force_groups(system, nonbonded=1, others=1, fft=0)
+        equil_steps = 500000
+        langevin_timestep = 0.1 * u.femtoseconds
+
+
+    if sysname == "switchedaccuratestiffflexiblewater":
+
+        testsystem = testsystems.WaterBox(box_edge=3.18 * u.nanometers, cutoff=1.1*u.nanometers, switch_width=3.0*u.angstroms, ewaldErrorTolerance=5E-5, constrained=False)  # Around 1060 molecules of water
+        system, positions = testsystem.system, testsystem.positions
+        # Using these groups for hyperopt-optimal RESPA integrators
+        #hmc_integrators.guess_force_groups(system, nonbonded=0, others=1, fft=0)
+        hmc_integrators.guess_force_groups(system, nonbonded=1, others=1, fft=0)
+        equil_steps = 100000
+        langevin_timestep = 0.25 * u.femtoseconds
+
+        FACTOR = 10.0
+        # Make bonded terms stiffer to highlight RESPA advantage
+        for force in system.getForces():
+            if type(force) == mm.HarmonicBondForce:
+                for i in range(force.getNumBonds()):
+                    (a0, a1, length, strength) = force.getBondParameters(i)
+                    force.setBondParameters(i, a0, a1, length, strength * FACTOR)
+
+            elif type(force) == mm.HarmonicAngleForce:
+                for i in range(force.getNumAngles()):
+                    (a0, a1, a2, length, strength) = force.getAngleParameters(i)
+                    force.setAngleParameters(i, a0, a1, a2, length, strength * FACTOR)
+
+
 
 
     if sysname == "switchedaccuratenptwater":

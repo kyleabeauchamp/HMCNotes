@@ -8,20 +8,20 @@ from simtk import unit as u
 from openmmtools import hmc_integrators, testsystems
 pd.set_option('display.width', 1000)
 
-n_steps = 500
+n_steps = 250
 platform_name = "CUDA"
 precision = "mixed"
 
-sysname = "amoeba"
+sysname = "switchedaccuratebigflexiblewater"
 
 system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc = lb_loader.load(sysname)
 positions, boxes, state = lb_loader.equilibrate(testsystem, temperature, langevin_timestep, steps=equil_steps, minimize=True, use_hmc=False, precision=precision, platform_name=platform_name)
 
 max_evals = 50
 
-steps_per_hmc = hp.quniform("steps_per_hmc", 5, 50, 1)
+steps_per_hmc = hp.quniform("steps_per_hmc", 25, 35, 1)
 group0_iterations = hp.quniform("group0_iterations", 1, 3, 1)
-timestep = hp.uniform("timestep", 0.4, 2.0)
+timestep = hp.uniform("timestep", 0.2, 0.5)
 #num_to_groups = lambda group0_iterations: ((0, 1), (1, group0_iterations))
 num_to_groups = lambda group0_iterations: ((0, group0_iterations), (1, 1))
 
@@ -40,6 +40,7 @@ def inner_objective(args):
     return integrator, simulation  # Have to pass simulation to keep it from being garbage collected
 
 def objective(args):
+    print("*" * 80)
     integrator, simulation = inner_objective(args)
     print("eff_ns_per_day=%f, eff_dt=%f" % (integrator.effective_ns_per_day, integrator.effective_timestep / u.femtoseconds))
     return -1.0 * integrator.effective_ns_per_day

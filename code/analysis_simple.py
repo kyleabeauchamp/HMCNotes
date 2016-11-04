@@ -6,7 +6,8 @@ import numpy as np
 pd.set_option('display.width', 1000)
 from lb_loader import summarize
 
-filenames = glob.glob("data/*/*.csv")
+#filenames = glob.glob("data/*/*.csv")
+filenames = glob.glob("data/switchedaccuratebigflexiblewater/*.csv")
 data = []
 for filename in filenames:
     data.append(summarize(filename)[1])

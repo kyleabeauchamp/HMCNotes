@@ -3,7 +3,7 @@ import experiments
 experiments = experiments.enumerate_experiments()
 DCD_FILENAMES = ["data/{sysname}/{intname}.dcd".format(sysname=sysname, intname=intname) for (sysname, intname) in experiments.keys()]
 
-N_EFF = 10
+N_EFF = 100000
 
 rule all:
     input:

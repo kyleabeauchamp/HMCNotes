@@ -23,9 +23,9 @@ def run():
     print(itype)
 
     simulation = lb_loader.build(testsystem, integrator, temperature, state=state)
-    simulation.runForClockTime(0.5 * u.minutes)
+    simulation.runForClockTime(1.0 * u.minutes)
 
-    output_frequency = 100 if "Langevin" in itype else 2
+    output_frequency = 100 if "Langevin" in itype else 1
     kineticEnergy = True if "MJHMC" in itype else False
     simulation.reporters.append(app.StateDataReporter(csv_filename, output_frequency, step=True, time=True, potentialEnergy=True, kineticEnergy=kineticEnergy, temperature=True, density=True, elapsedTime=True))
     simulation.reporters.append(app.DCDReporter(dcd_filename, output_frequency))
