@@ -1,0 +1,17 @@
+name: hmc
+channels:
+  - conda-forge
+  - bioconda
+  - omnia
+dependencies:
+  - python=3.6
+  - pandas
+  - snakemake
+  - openmm
+  - pymbar
+  - mdtraj
+  - parmed
+  - scikit-learn
+  - pip:
+    - fire
+    - arch

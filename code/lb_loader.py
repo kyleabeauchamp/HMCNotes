@@ -1,7 +1,6 @@
 from openmmtools import hmc_integrators, testsystems
 import pymbar
 import pandas as pd
-import time
 from simtk.openmm import app
 import numpy as np
 import simtk.openmm as mm
@@ -12,6 +11,34 @@ PRECISION = "mixed"
 
 format_int_name = lambda prms: "{itype}_{timestep}_{collision}".format(**prms)
 format_name = lambda prms: "{sysname}/{itype}_{timestep}_{collision}.".format(**prms)
+
+num_to_groups = lambda group0_iterations, n_groups: ([(0, group0_iterations)] + [(i, 1) for i in range(1, n_groups)])
+
+def kw_to_int(**kwargs):
+    steps_per_hmc = kwargs["steps_per_hmc"]
+    timestep = kwargs["timestep"]
+    group0_iterations = kwargs["group0_iterations"]
+    temperature = kwargs["temperature"]
+    print("*" * 80)
+    print("steps=%d, timestep=%f, extra_chances=%d, group0_iterations=%d" % (steps_per_hmc, timestep, 0, group0_iterations))
+    timestep = timestep * u.femtoseconds
+    steps_per_hmc = int(steps_per_hmc)
+    group0_iterations = int(group0_iterations)
+    n_groups = max(kwargs["groups"]) + 1  # 1 group means group number = 0, assumes zero index and ordering
+    groups = num_to_groups(group0_iterations, n_groups)
+    print(n_groups)
+    print(groups)
+
+    if kwargs["group0_iterations"] == 0 and kwargs["extra_chances"] == 0:
+        integrator = hmc_integrators.GHMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep)
+    elif kwargs["group0_iterations"] > 0 and kwargs["extra_chances"] > 0 :
+        integrator = hmc_integrators.XCGHMCRESPAIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, groups=groups)
+    elif kwargs["group0_iterations"] > 0 and kwargs["extra_chances"] == 0 :
+        integrator = hmc_integrators.GHMCRESPAIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, groups=groups)
+    elif kwargs["group0_iterations"] == 0 and kwargs["extra_chances"] > 0 :
+        integrator = hmc_integrators.XCGHMCIntegrator(temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, groups=groups)
+
+    return integrator
 
 def write_file(filename, contents):
     with open(filename, 'w') as outfile:
@@ -121,24 +148,22 @@ def converge(simulation, csv_filename, Neff_cutoff=1E4, sleep_time=0.5 * u.minut
         if results.Neff > Neff_cutoff:
             return statedata, results
 
+
 def build(testsystem, integrator, temperature, precision="mixed", state=None, platform_name="CUDA"):
     system, topology, positions = testsystem.system, testsystem.topology, testsystem.positions
-
     try:
         platform = mm.Platform.getPlatformByName(platform_name)
         if platform_name == "CUDA":
-            properties = {'CudaPrecision': precision}
+            properties = {'CudaPrecision': precision, "DeterministicForces": "1"}
             simulation = app.Simulation(topology, system, integrator, platform=platform, platformProperties=properties)
         if platform_name == "OpenCL":
             properties = {'Precision': precision}
             simulation = app.Simulation(topology, system, integrator, platform=platform, platformProperties=properties)
         elif platform_name == "CPU":
             simulation = app.Simulation(topology, system, integrator, platform=platform)
-        #context = mm.Context(system, integrator, platform, properties)
     except Exception as e:
         print(e)
         print("Warning: no CUDA platform found, not specifying precision.")
-        #context = mm.Context(system, integrator)
         simulation = app.Simulation(topology, system, integrator)
 
     context = simulation.context
@@ -284,9 +309,8 @@ def load(sysname):
         testsystem = testsystems.WaterBox(box_edge=10.0 * u.nanometers, cutoff=1.1*u.nanometers, switch_width=3.0*u.angstroms, ewaldErrorTolerance=5E-5, constrained=False)  # Around 1060 molecules of water
         system, positions = testsystem.system, testsystem.positions
         # Using these groups for hyperopt-optimal RESPA integrators
-        #hmc_integrators.guess_force_groups(system, nonbonded=0, others=1, fft=0)
-        hmc_integrators.guess_force_groups(system, nonbonded=1, others=1, fft=0)
-        equil_steps = 500000
+        hmc_integrators.guess_force_groups(system, nonbonded=1, others=0, fft=1)
+        equil_steps = 100000
         langevin_timestep = 0.1 * u.femtoseconds
 
 
@@ -351,6 +375,15 @@ def load(sysname):
         timestep = 0.75 * u.femtoseconds
         equil_steps = 10000
 
+
+    if sysname == "src":
+        testsystem = testsystems.SrcExplicit(nonbondedCutoff=1.1*u.nanometers, nonbondedMethod=app.PME, switch_width=2.0*u.angstroms, ewaldErrorTolerance=5E-5)
+        system, positions = testsystem.system, testsystem.positions
+        hmc_integrators.guess_force_groups(system, nonbonded=1, fft=1, others=0)
+        groups = [(0, 2), (1, 1)]
+        timestep = 0.25 * u.femtoseconds
+        equil_steps = 1000
+
     if sysname == "ho":
         K = 90.0 * u.kilocalories_per_mole / u.angstroms**2
         mass = 39.948 * u.amu
@@ -411,15 +444,6 @@ def load(sysname):
         testsystem = testsystems.AMOEBAIonBox()
         system, positions = testsystem.system, testsystem.positions
         hmc_integrators.guess_force_groups(system, nonbonded=0, fft=1, others=0)
-
-
-
-    elif "water" in sysname:
-        timestep = 4.0 * u.femtoseconds
-        groups = [(0, 1), (1, 2)]
-        hmc_integrators.guess_force_groups(system, nonbonded=1, fft=0)
-        equil_steps = 10000
-
 
 
     return system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc

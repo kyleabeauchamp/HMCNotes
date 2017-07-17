@@ -3,13 +3,11 @@ import lb_loader
 import simtk.openmm.app as app
 import simtk.openmm as mm
 from simtk import unit as u
-from openmmtools import hmc_integrators, testsystems
-from experiments import enumerate_experiments
 import pickle
-import sys
+import fire
 
-def run():
-    system_filename, state_filename, integrator_filename, sysname, Neff_cutoff, csv_filename, dcd_filename = sys.argv[1:]
+
+def run(system_filename, state_filename, integrator_filename, sysname, Neff_cutoff, csv_filename, dcd_filename):
 
     Neff_cutoff = float(Neff_cutoff)
 
@@ -27,10 +25,12 @@ def run():
 
     output_frequency = 100 if "Langevin" in itype else 1
     kineticEnergy = True if "MJHMC" in itype else False
-    simulation.reporters.append(app.StateDataReporter(csv_filename, output_frequency, step=True, time=True, potentialEnergy=True, kineticEnergy=kineticEnergy, temperature=True, density=True, elapsedTime=True))
+    simulation.reporters.append(app.StateDataReporter(csv_filename, output_frequency, step=True,
+                                                      time=True, potentialEnergy=True, kineticEnergy=kineticEnergy,
+                                                      temperature=True, density=True, elapsedTime=True))
     simulation.reporters.append(app.DCDReporter(dcd_filename, output_frequency))
     lb_loader.converge(simulation, csv_filename, Neff_cutoff)
 
-if __name__ == "__main__":
 
-    run()
+if __name__ == "__main__":
+    fire.Fire(run)

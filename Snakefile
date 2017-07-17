@@ -1,7 +1,9 @@
-import experiments
+from experiments import enumerate_experiments, EXPERIMENTS
 
-experiments = experiments.enumerate_experiments()
-DCD_FILENAMES = ["data/{sysname}/{intname}.dcd".format(sysname=sysname, intname=intname) for (sysname, intname) in experiments.keys()]
+enumerate_experiments()
+print(EXPERIMENTS)
+
+DCD_FILENAMES = ["data/{sysname}/{intname}.dcd".format(sysname=sysname, intname=intname) for (sysname, intname) in EXPERIMENTS.keys()]
 
 N_EFF = 100000
 
