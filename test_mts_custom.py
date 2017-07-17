@@ -141,9 +141,9 @@ class HMCIntegrator(mm.CustomIntegrator):
 f = lambda x: (x.getPotentialEnergy(), x.getKineticEnergy(), x.getKineticEnergy() + x.getPotentialEnergy())
 
 temperature = 300. * u.kelvin
-testsystem = testsystems.LennardJonesFluid(nparticles=2048)
+testsystem = testsystems.WaterBox(box_edge=10.0 * u.nanometers, cutoff=1.1*u.nanometers, switch_width=3.0*u.angstroms, ewaldErrorTolerance=5E-5, constrained=False)
 timestep = 0.1 * u.femtoseconds
-nsteps = 200
+nsteps = 300
 
 print("*" * 80)
 print("force groups:")

@@ -8,20 +8,20 @@ from simtk import unit as u
 from openmmtools import hmc_integrators, testsystems
 pd.set_option('display.width', 1000)
 
-n_steps = 300
+n_steps = 1000
 platform_name = "CUDA"
 precision = "mixed"
 
-sysname = "switchedaccurateflexiblewater"
+sysname = "src"
 
 system, positions, groups, temperature, timestep, langevin_timestep, testsystem, equil_steps, steps_per_hmc = lb_loader.load(sysname)
 positions, boxes, state = lb_loader.equilibrate(testsystem, temperature, langevin_timestep, steps=equil_steps, minimize=True, use_hmc=False, precision=precision, platform_name=platform_name)
 
-max_evals = 35
+max_evals = 500
 
-steps_per_hmc = hp.quniform("steps_per_hmc", 9, 30, 1)
+steps_per_hmc = hp.quniform("steps_per_hmc", 5, 30, 1)
 extra_chances = hp.quniform("extra_chances", 1, 4, 1)
-timestep = hp.uniform("timestep", 0.25, 1.0)
+timestep = hp.uniform("timestep", 0.25, 1.5)
 
 
 def inner_objective(args):
