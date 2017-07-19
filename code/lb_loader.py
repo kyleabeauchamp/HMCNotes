@@ -118,6 +118,7 @@ def load_amoeba(hydrogenMass=1.0):
     system = forcefield.createSystem(pdb.topology, nonbondedMethod=app.PME, nonbondedCutoff=1.0*u.nanometers, hydrogenMass=hydrogenMass * u.amu, rigidWater=False)
     return system, pdb.positions
 
+
 def summarize(filename):
     statedata = pd.read_csv(filename)
     energies = statedata["Potential Energy (kJ/mole)"].values
@@ -138,13 +139,10 @@ def summarize(filename):
 
 
 def converge(simulation, csv_filename, Neff_cutoff=1E4, sleep_time=0.5 * u.minutes):
-    integrator = simulation.integrator
-    itype = type(integrator).__name__
     while True:
         simulation.runForClockTime(sleep_time)
         statedata, results = summarize(csv_filename)
         print(results.to_frame().T)
-
         if results.Neff > Neff_cutoff:
             return statedata, results
 

@@ -47,35 +47,21 @@ def enumerate_experiments():
         expt = Experiment(integrator=integrator, sysname=sysname, prms=prms)
 
     collision_rate = None
-    for timestep in [2.0 * u.femtoseconds, 20.0 * u.femtoseconds]:
+    for timestep in [20.0 * u.femtoseconds]:
         integrator = hmc_integrators.GHMCIntegrator(temperature=temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, collision_rate=collision_rate)
         prms = dict(sysname=sysname, timestep=timestep / u.femtoseconds, collision=lb_loader.fixunits(collision_rate))
         expt = Experiment(integrator=integrator, sysname=sysname, prms=prms)
 
-    return
-    # hyperopt optimal parameters obtained ~21573 ns / day
-    collision_rate = None
-    steps_per_hmc = 46
-    timestep = 31.928 * u.femtoseconds
-    integrator = hmc_integrators.GHMCIntegrator(temperature=temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, collision_rate=collision_rate)
-    itype = type(integrator).__name__
-    prms = dict(sysname=sysname, itype=itype, timestep=timestep / u.femtoseconds, collision=lb_loader.fixunits(collision_rate))
-    int_string = lb_loader.format_int_name(prms)
-    key = (sysname, int_string)
-    experiments[key] = integrator
-
-    # Using hyperopt optimal parameters from GHMC above, but with manually tuned 2 extra chances
-    collision_rate = None
-    steps_per_hmc = 46
-    timestep = 31.928 * u.femtoseconds
+    timestep = 35.0 * u.femtoseconds
     extra_chances = 2
+    collision_rate = 1.0 / u.picoseconds
 
     integrator = hmc_integrators.XCGHMCIntegrator(temperature=temperature, steps_per_hmc=steps_per_hmc, timestep=timestep, extra_chances=extra_chances, collision_rate=collision_rate)
     itype = type(integrator).__name__
     prms = dict(sysname=sysname, itype=itype, timestep=timestep / u.femtoseconds, collision=lb_loader.fixunits(collision_rate))
-    int_string = lb_loader.format_int_name(prms)
-    key = (sysname, int_string)
-    experiments[key] = integrator
+    expt = Experiment(integrator=integrator, sysname=sysname, prms=prms)
+
+    return
 
     collision_rate = None
     for timestep in []:  # [2.0 * u.femtoseconds]:
